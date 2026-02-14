@@ -343,3 +343,12 @@ Importante:
 ---
 
 Si quieres, el siguiente paso puede ser añadir una guía de despliegue productivo completa (Nginx + systemd + PostgreSQL + backup/restore) también en español dentro de este README.
+
+## 19. Licencia y uso
+Este proyecto es propiedad de **Pedro Jose Bauza Ruiz** (`pjbauza@gmail.com`).
+
+La licencia de este repositorio es **propietaria y de uso prohibido**.  
+No se permite ningún uso del código (ni comercial ni no comercial) sin autorización
+previa y por escrito del titular.
+
+Ver archivo: `LICENSE`.
