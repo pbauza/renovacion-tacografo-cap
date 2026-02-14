@@ -7,7 +7,7 @@
     "dashboard_logo_path": "/static/img/logo.png"
   },
   "pdf": {
-    "report_title": "Client Renewal Report",
+    "report_title": "Informe de Renovaciones de Cliente",
     "organization_name": "Renovaciones Tacografo CAP",
     "contact_email": "contact@renovaciones.local",
     "contact_phone": "+34 000 000 000"

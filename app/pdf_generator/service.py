@@ -121,18 +121,18 @@ class PdfGeneratorService:
     ) -> list[Any]:
         story: list[Any] = []
         story.append(Spacer(1, 45 * mm))
-        story.append(Paragraph("CLIENT RENEWAL REPORT", styles["title"]))
+        story.append(Paragraph("INFORME DE RENOVACIONES DEL CLIENTE", styles["title"]))
         story.append(Spacer(1, 6 * mm))
         story.append(Paragraph(organization_name, styles["subtitle"]))
         story.append(Spacer(1, 14 * mm))
 
         info_rows = [
-            ["Client Name", str(getattr(client, "full_name", "") or "-")],
-            ["Client ID", str(getattr(client, "id", "") or "-")],
+            ["Nombre del cliente", str(getattr(client, "full_name", "") or "-")],
+            ["ID de cliente", str(getattr(client, "id", "") or "-")],
             ["NIF", str(getattr(client, "nif", "") or "-")],
-            ["Phone", str(getattr(client, "phone", "") or "-")],
-            ["Company", str(getattr(client, "company", "") or "-")],
-            ["Report Date", _fmt_official_datetime(generated_at)],
+            ["Telefono", str(getattr(client, "phone", "") or "-")],
+            ["Empresa", str(getattr(client, "company", "") or "-")],
+            ["Fecha del informe", _fmt_official_datetime(generated_at)],
         ]
         table = _styled_key_value_table(info_rows, width=165 * mm)
         story.append(table)
@@ -142,7 +142,7 @@ class PdfGeneratorService:
         if photo_path:
             image = _build_thumbnail(photo_path, max_w=70 * mm, max_h=70 * mm)
             if image:
-                story.append(Paragraph("Client Photo", styles["h3"]))
+                story.append(Paragraph("Foto del cliente", styles["h3"]))
                 story.append(Spacer(1, 2 * mm))
                 story.append(image)
 
@@ -151,43 +151,43 @@ class PdfGeneratorService:
 
     def _build_table_of_contents(self, *, styles: dict[str, ParagraphStyle]) -> list[Any]:
         story: list[Any] = []
-        story.append(Paragraph("TABLE OF CONTENTS", styles["h1"]))
+        story.append(Paragraph("INDICE DE CONTENIDOS", styles["h1"]))
         story.append(Spacer(1, 3 * mm))
         entries = [
-            "1. Client Data",
-            "2. Documents Summary",
-            "3. Documents Detail",
-            "4. Alerts Summary",
+            "1. Datos del cliente",
+            "2. Resumen de documentos",
+            "3. Detalle de documentos",
+            "4. Resumen de alertas",
         ]
         for entry in entries:
             story.append(Paragraph(entry, styles["body"]))
             story.append(Spacer(1, 1.5 * mm))
         story.append(Spacer(1, 6 * mm))
-        story.append(Paragraph("Page numbers are included in the footer of each page.", styles["muted"]))
+        story.append(Paragraph("La numeracion de pagina se muestra en el pie de cada hoja.", styles["muted"]))
         story.append(PageBreak())
         return story
 
     def _build_client_data_section(self, *, styles: dict[str, ParagraphStyle], client: Any) -> list[Any]:
         rows = [
-            ["Client ID", str(getattr(client, "id", "") or "-")],
-            ["Full Name", str(getattr(client, "full_name", "") or "-")],
+            ["ID de cliente", str(getattr(client, "id", "") or "-")],
+            ["Nombre completo", str(getattr(client, "full_name", "") or "-")],
             ["NIF", str(getattr(client, "nif", "") or "-")],
-            ["Company", str(getattr(client, "company", "") or "-")],
-            ["Phone", str(getattr(client, "phone", "") or "-")],
+            ["Empresa", str(getattr(client, "company", "") or "-")],
+            ["Telefono", str(getattr(client, "phone", "") or "-")],
             ["Email", str(getattr(client, "email", "") or "-")],
-            ["Created At", _fmt_official_datetime(getattr(client, "created_at", None))],
+            ["Fecha de alta", _fmt_official_datetime(getattr(client, "created_at", None))],
         ]
-        story = [Paragraph("1. CLIENT DATA", styles["h1"]), Spacer(1, 3 * mm), _styled_key_value_table(rows), Spacer(1, 8 * mm)]
+        story = [Paragraph("1. DATOS DEL CLIENTE", styles["h1"]), Spacer(1, 3 * mm), _styled_key_value_table(rows), Spacer(1, 8 * mm)]
         return story
 
     def _build_documents_summary_section(self, *, styles: dict[str, ParagraphStyle], documents: list[Any]) -> list[Any]:
-        story: list[Any] = [Paragraph("2. DOCUMENTS SUMMARY", styles["h1"]), Spacer(1, 3 * mm)]
+        story: list[Any] = [Paragraph("2. RESUMEN DE DOCUMENTOS", styles["h1"]), Spacer(1, 3 * mm)]
         if not documents:
-            story.append(Paragraph("No documents registered.", styles["body"]))
+            story.append(Paragraph("No hay documentos registrados.", styles["body"]))
             story.append(Spacer(1, 8 * mm))
             return story
 
-        header = ["ID", "Type", "Expiration", "Status", "PDF"]
+        header = ["ID", "Tipo", "Caducidad", "Estado", "PDF"]
         rows = [header]
         for doc in documents:
             exp = getattr(doc, "expiry_date", None)
@@ -198,7 +198,7 @@ class PdfGeneratorService:
                     _human_doc_type(getattr(getattr(doc, "doc_type", None), "value", getattr(doc, "doc_type", ""))),
                     _fmt_official_date(exp),
                     status,
-                    "Yes" if getattr(doc, "pdf_path", None) else "No",
+                    "Si" if getattr(doc, "pdf_path", None) else "No",
                 ]
             )
 
@@ -224,16 +224,16 @@ class PdfGeneratorService:
         return story
 
     def _build_documents_detail_section(self, *, styles: dict[str, ParagraphStyle], documents: list[Any]) -> list[Any]:
-        story: list[Any] = [Paragraph("3. DOCUMENTS DETAIL", styles["h1"]), Spacer(1, 3 * mm)]
+        story: list[Any] = [Paragraph("3. DETALLE DE DOCUMENTOS", styles["h1"]), Spacer(1, 3 * mm)]
         if not documents:
-            story.append(Paragraph("No detailed document information available.", styles["body"]))
+            story.append(Paragraph("No hay detalle de documentos disponible.", styles["body"]))
             story.append(Spacer(1, 8 * mm))
             return story
 
         for doc in documents:
             story.append(
                 Paragraph(
-                    f"Document {getattr(doc, 'id', '-')} - "
+                    f"Documento {getattr(doc, 'id', '-')} - "
                     f"{_human_doc_type(getattr(getattr(doc, 'doc_type', None), 'value', getattr(doc, 'doc_type', '')))}",
                     styles["h2"],
                 )
@@ -241,36 +241,36 @@ class PdfGeneratorService:
             story.append(Spacer(1, 1.5 * mm))
 
             fields = [
-                ["Client ID", str(getattr(doc, "client_id", "") or "-")],
-                ["Expiration Date", _fmt_official_date(getattr(doc, "expiry_date", None))],
-                ["Issue Date", _fmt_official_date(getattr(doc, "issue_date", None))],
-                ["Birth Date", _fmt_official_date(getattr(doc, "birth_date", None))],
-                ["Address", str(getattr(doc, "address", "") or "-")],
-                ["Course Number", str(getattr(doc, "course_number", "") or "-")],
-                ["Flag FRAN", "Yes" if bool(getattr(doc, "flag_fran", False)) else "No"],
-                ["Flag CIUSABA", "Yes" if bool(getattr(doc, "flag_ciusaba", False)) else "No"],
-                ["Expiry FRAN", _fmt_official_date(getattr(doc, "expiry_fran", None))],
-                ["Expiry CIUSABA", _fmt_official_date(getattr(doc, "expiry_ciusaba", None))],
-                ["Document File", str(getattr(doc, "pdf_path", "") or "-")],
+                ["ID de cliente", str(getattr(doc, "client_id", "") or "-")],
+                ["Fecha de caducidad", _fmt_official_date(getattr(doc, "expiry_date", None))],
+                ["Fecha de emision", _fmt_official_date(getattr(doc, "issue_date", None))],
+                ["Fecha de nacimiento", _fmt_official_date(getattr(doc, "birth_date", None))],
+                ["Direccion", str(getattr(doc, "address", "") or "-")],
+                ["Numero de curso", str(getattr(doc, "course_number", "") or "-")],
+                ["Flag FRAN", "Si" if bool(getattr(doc, "flag_fran", False)) else "No"],
+                ["Flag CIUSABA", "Si" if bool(getattr(doc, "flag_ciusaba", False)) else "No"],
+                ["Caducidad FRAN", _fmt_official_date(getattr(doc, "expiry_fran", None))],
+                ["Caducidad CIUSABA", _fmt_official_date(getattr(doc, "expiry_ciusaba", None))],
+                ["Archivo del documento", str(getattr(doc, "pdf_path", "") or "-")],
             ]
             story.append(_styled_key_value_table(fields))
 
             doc_image = _build_thumbnail(_resolve_existing_path(getattr(doc, "pdf_path", None)), max_w=50 * mm, max_h=50 * mm)
             if doc_image:
                 story.append(Spacer(1, 1 * mm))
-                story.append(Paragraph("Document Thumbnail", styles["muted"]))
+                story.append(Paragraph("Miniatura del documento", styles["muted"]))
                 story.append(doc_image)
 
             story.append(Spacer(1, 5 * mm))
         return story
 
     def _build_alerts_summary_section(self, *, styles: dict[str, ParagraphStyle], alerts: list[Any]) -> list[Any]:
-        story: list[Any] = [Paragraph("4. ALERTS SUMMARY", styles["h1"]), Spacer(1, 3 * mm)]
+        story: list[Any] = [Paragraph("4. RESUMEN DE ALERTAS", styles["h1"]), Spacer(1, 3 * mm)]
         if not alerts:
-            story.append(Paragraph("No alerts available for this client.", styles["body"]))
+            story.append(Paragraph("No hay alertas disponibles para este cliente.", styles["body"]))
             return story
 
-        header = ["Alert ID", "Document ID", "Expiry Date", "Alert Date"]
+        header = ["ID alerta", "ID documento", "Fecha caducidad", "Fecha alerta"]
         rows = [header]
         for alert in alerts:
             rows.append(
@@ -408,7 +408,7 @@ def _build_base_template(
 
         canvas.setFont("Helvetica", 8.5)
         canvas.setFillColor(colors.HexColor("#374151"))
-        canvas.drawString(left_margin + 24 * mm, height - 18 * mm, f"Generated: {_fmt_official_datetime(generated_at)}")
+        canvas.drawString(left_margin + 24 * mm, height - 18 * mm, f"Generado: {_fmt_official_datetime(generated_at)}")
         canvas.setStrokeColor(colors.HexColor("#d1d5db"))
         canvas.line(left_margin, height - 27 * mm, width - right_margin, height - 27 * mm)
 
@@ -445,8 +445,8 @@ class NumberedCanvas(Canvas):
         self.line(20 * mm, 17 * mm, width - 20 * mm, 17 * mm)
         self.setFillColor(colors.HexColor("#4b5563"))
         self.setFont("Helvetica", 8)
-        self.drawString(20 * mm, 12 * mm, f"Contact: {self._contact_email} | {self._contact_phone}")
-        self.drawRightString(width - 20 * mm, 12 * mm, f"Page {self._pageNumber} / {total_pages}")
+        self.drawString(20 * mm, 12 * mm, f"Contacto: {self._contact_email} | {self._contact_phone}")
+        self.drawRightString(width - 20 * mm, 12 * mm, f"Pagina {self._pageNumber} / {total_pages}")
         self.restoreState()
 
 
@@ -511,10 +511,10 @@ def _fmt_official_date(value: Any) -> str:
     if isinstance(value, datetime):
         value = value.date()
     if isinstance(value, date):
-        return value.strftime("%d %B %Y")
+        return _format_spanish_date(value)
     try:
         parsed = datetime.fromisoformat(str(value)).date()
-        return parsed.strftime("%d %B %Y")
+        return _format_spanish_date(parsed)
     except Exception:  # noqa: BLE001
         return str(value)
 
@@ -525,29 +525,47 @@ def _fmt_official_datetime(value: Any) -> str:
     if isinstance(value, date) and not isinstance(value, datetime):
         value = datetime.combine(value, datetime.min.time())
     if isinstance(value, datetime):
-        return value.strftime("%d %B %Y %H:%M")
+        return f"{_format_spanish_date(value.date())} {value.strftime('%H:%M')}"
     try:
         parsed = datetime.fromisoformat(str(value))
-        return parsed.strftime("%d %B %Y %H:%M")
+        return f"{_format_spanish_date(parsed.date())} {parsed.strftime('%H:%M')}"
     except Exception:  # noqa: BLE001
         return str(value)
+
+
+def _format_spanish_date(value: date) -> str:
+    meses = {
+        1: "enero",
+        2: "febrero",
+        3: "marzo",
+        4: "abril",
+        5: "mayo",
+        6: "junio",
+        7: "julio",
+        8: "agosto",
+        9: "septiembre",
+        10: "octubre",
+        11: "noviembre",
+        12: "diciembre",
+    }
+    return f"{value.day:02d} {meses[value.month]} {value.year}"
 
 
 def _human_doc_type(raw: str) -> str:
     mapping = {
         "dni": "DNI",
-        "driving_license": "Driving License",
+        "driving_license": "Carnet de conducir",
         "cap": "CAP",
-        "tachograph_card": "Tachograph Card",
+        "tachograph_card": "Tarjeta tacografo",
         "power_of_attorney": "Power of Attorney",
-        "other": "Other",
+        "other": "Otro",
     }
     return mapping.get(str(raw), str(raw))
 
 
 def _expiration_status(value: Any) -> str:
     if value is None:
-        return "No expiry"
+        return "Sin caducidad"
     if isinstance(value, datetime):
         value = value.date()
     if not isinstance(value, date):
@@ -557,7 +575,7 @@ def _expiration_status(value: Any) -> str:
             return "Unknown"
     today = date.today()
     if value < today:
-        return "Expired"
+        return "Caducado"
     if (value - today).days <= 90:
-        return "Expiring soon"
-    return "Valid"
+        return "Caduca pronto"
+    return "Vigente"
