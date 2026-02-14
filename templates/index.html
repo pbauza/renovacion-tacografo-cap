@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{{ app_name }}</title>
+  <link rel="stylesheet" href="/static/app.css" />
+</head>
+<body>
+  <header class="topbar">
+    <h1>{{ app_name }}</h1>
+    <p>Gestor de clientes, documentos y alertas</p>
+  </header>
+
+  <main class="layout">
+    <section class="panel">
+      <h2>Dashboard</h2>
+      <div class="cards">
+        <article class="card"><h3>Vence 30 días</h3><p id="due30">0</p></article>
+        <article class="card"><h3>Vence 60 días</h3><p id="due60">0</p></article>
+        <article class="card"><h3>Vence 90 días</h3><p id="due90">0</p></article>
+        <article class="card"><h3>Total documentos</h3><p id="documentsTotal">0</p></article>
+        <article class="card"><h3>Total alertas</h3><p id="alertsTotal">0</p></article>
+        <article class="card"><h3>Alertas vencidas</h3><p id="alertsDue">0</p></article>
+      </div>
+      <button id="refreshDashboard">Actualizar dashboard</button>
+    </section>
+
+    <section class="panel">
+      <h2>Buscar Clientes</h2>
+      <form id="searchForm">
+        <input name="full_name" placeholder="Nombre" />
+        <input name="nif" placeholder="NIF" />
+        <input name="company" placeholder="Empresa" />
+        <input name="phone" placeholder="Teléfono" />
+        <button type="submit">Buscar</button>
+      </form>
+      <p><strong>Cliente seleccionado:</strong> <span id="selectedClient">ninguno</span></p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>ID</th><th>Nombre</th><th>NIF</th><th>Empresa</th><th>Teléfono</th><th>Foto</th></tr>
+          </thead>
+          <tbody id="clientsTable"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Crear Cliente</h2>
+      <form id="clientCreateForm">
+        <input name="full_name" placeholder="Nombre completo" required />
+        <input name="company" placeholder="Empresa (opcional)" />
+        <input name="nif" placeholder="NIF" required />
+        <input name="phone" placeholder="Teléfono" required />
+        <input name="email" type="email" placeholder="Email (opcional)" />
+        <button type="submit">Crear cliente</button>
+      </form>
+      <div class="dropzone" id="createPhotoDropzone">Arrastra foto aqui antes o despues de crear el cliente</div>
+      <p class="hint">La foto se guarda en `storage/clientes/{nif}/{nif}_foto_cliente.ext`</p>
+    </section>
+
+    <section class="panel">
+      <h2>Editar Cliente</h2>
+      <form id="clientEditForm">
+        <input name="id" type="number" placeholder="Client ID" required />
+        <input name="full_name" placeholder="Nombre completo" />
+        <input name="company" placeholder="Empresa" />
+        <input name="nif" placeholder="NIF" />
+        <input name="phone" placeholder="Teléfono" />
+        <input name="email" type="email" placeholder="Email" />
+        <button type="submit">Guardar cambios</button>
+      </form>
+      <div class="dropzone" id="editPhotoDropzone">Arrastra foto para sustituir foto actual del cliente</div>
+    </section>
+
+    <section class="panel">
+      <h2>Crear Documento (por cliente seleccionado)</h2>
+      <form id="documentCreateForm">
+        <input name="client_id" id="documentClientId" type="number" placeholder="Client ID" required readonly />
+        <select name="doc_type" id="docType" required>
+          <option value="dni">DNI</option>
+          <option value="driving_license">Carnet conducir</option>
+          <option value="cap">CAP</option>
+          <option value="tachograph_card">Tarjeta tacógrafo</option>
+          <option value="power_of_attorney">Power of Attorney</option>
+          <option value="other">Other</option>
+        </select>
+        <input name="expiry_date" type="date" placeholder="Fecha caducidad" />
+        <input name="issue_date" type="date" placeholder="Fecha obtención" />
+        <input name="birth_date" type="date" placeholder="Fecha nacimiento" />
+        <input name="address" placeholder="Dirección" />
+        <input name="course_number" placeholder="Número de curso (CAP opcional)" />
+        <label><input name="flag_fran" type="checkbox" /> Flag FRAN</label>
+        <label><input name="flag_ciusaba" type="checkbox" /> Flag CIUSABA</label>
+        <input name="expiry_fran" type="date" placeholder="Caducidad FRAN" />
+        <input name="expiry_ciusaba" type="date" placeholder="Caducidad CIUSABA" />
+        <button type="submit">Crear documento</button>
+      </form>
+      <div class="dropzone" id="createDocumentDropzone">Arrastra PDF aquí para el documento recién creado</div>
+      <p class="hint">Se guarda en `storage/documentos/{nif}/{tipo}/{nif}_{tipo}.pdf`</p>
+    </section>
+
+    <section class="panel">
+      <h2>Editar Documento</h2>
+      <form id="documentEditForm">
+        <input name="id" type="number" placeholder="Document ID" required />
+        <input name="expiry_date" type="date" placeholder="Fecha caducidad" />
+        <input name="issue_date" type="date" placeholder="Fecha obtención" />
+        <input name="birth_date" type="date" placeholder="Fecha nacimiento" />
+        <input name="address" placeholder="Dirección" />
+        <input name="course_number" placeholder="Número de curso" />
+        <label><input name="flag_fran" type="checkbox" /> Flag FRAN</label>
+        <label><input name="flag_ciusaba" type="checkbox" /> Flag CIUSABA</label>
+        <input name="expiry_fran" type="date" placeholder="Caducidad FRAN" />
+        <input name="expiry_ciusaba" type="date" placeholder="Caducidad CIUSABA" />
+        <button type="submit">Guardar documento</button>
+      </form>
+      <div class="dropzone" id="editDocumentDropzone">Arrastra PDF para sustituir documento actual</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>ID</th><th>Client</th><th>Tipo</th><th>Caducidad</th><th>PDF</th></tr></thead>
+          <tbody id="documentsTable"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Alertas</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>ID</th><th>Client</th><th>Doc</th><th>Caducidad</th><th>Fecha alerta</th></tr></thead>
+          <tbody id="alertsTable"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <section class="logbox">
+    <h2>Log</h2>
+    <pre id="log"></pre>
+  </section>
+
+  <script>
+    window.APP_CONFIG = { apiPrefix: "{{ api_prefix }}" };
+  </script>
+  <script src="/static/app.js"></script>
+</body>
+</html>

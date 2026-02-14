@@ -1,0 +1,4 @@
+full_name,nif,phone,company,email,document_type,expiry_date,issue_date,birth_date,address,course_number,flag_fran,flag_ciusaba,expiry_fran,expiry_ciusaba
+Laura Marin,11112222A,600111222,TransMarin SL,laura@transmarin.es,cap,2026-07-10,2021-07-10,1987-04-22,Calle Mayor 10, Valencia,CAP-2026-01,False,False,,
+Carlos Vega,22223333B,600222333,,carlos.vega@example.com,dni,2027-01-15,,1990-09-03,Av. Libertad 45, Alicante,,False,False,,
+Marta Solis,33334444C,600333444,Logistica Solis,marta@solislog.com,power_of_attorney,,,,,,True,True,2026-09-01,2026-11-01

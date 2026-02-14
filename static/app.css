@@ -1,0 +1,158 @@
+:root {
+  --bg: #f7f5ef;
+  --panel: #ffffff;
+  --ink: #1e1f24;
+  --muted: #6a6f7a;
+  --accent: #0f766e;
+  --line: #d9dcd6;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", "Noto Sans", sans-serif;
+  color: var(--ink);
+  background: radial-gradient(circle at top right, #e9f5ef, var(--bg) 45%);
+}
+
+.topbar {
+  padding: 1.2rem 1.5rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.topbar h1 { margin: 0; font-size: 1.4rem; }
+.topbar p { margin: 0.35rem 0 0; color: var(--muted); }
+
+.layout {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.6rem;
+  margin-bottom: 0.9rem;
+}
+
+.card {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0.7rem;
+}
+
+.card h3 { margin: 0; font-size: 0.8rem; color: var(--muted); }
+.card p { margin: 0.3rem 0 0; font-size: 1.25rem; font-weight: 700; }
+
+form {
+  display: grid;
+  gap: 0.5rem;
+  margin-bottom: 0.8rem;
+}
+
+input, select, button {
+  font: inherit;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0.55rem 0.65rem;
+}
+
+button {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+  cursor: pointer;
+}
+
+.table-wrap {
+  overflow: auto;
+  max-height: 240px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+tbody tr {
+  cursor: pointer;
+}
+
+tbody tr:hover {
+  background: #eef7f5;
+}
+
+th, td {
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+  padding: 0.35rem;
+}
+
+.logbox {
+  margin: 0 1rem 1rem;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+#log {
+  margin: 0;
+  min-height: 84px;
+  white-space: pre-wrap;
+}
+
+.dropzone {
+  margin: 0.4rem 0 0.6rem;
+  padding: 0.8rem;
+  border: 2px dashed #8aa39f;
+  border-radius: 10px;
+  color: #38524d;
+  background: #f3fbf9;
+}
+
+.dropzone.dragging {
+  border-color: var(--accent);
+  background: #e3f7f3;
+}
+
+.hint {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.preview-wrap {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.preview-wrap p {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.dropzone-preview {
+  width: 100%;
+  max-height: 180px;
+  object-fit: contain;
+  border-radius: 8px;
+  border: 1px solid #c9d4d1;
+  background: #ffffff;
+}
+
+@media (max-width: 860px) {
+  .cards { grid-template-columns: repeat(2, 1fr); }
+}

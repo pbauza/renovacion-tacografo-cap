@@ -1,0 +1,50 @@
+{
+  "entity": "document",
+  "types": {
+    "dni": {
+      "label": "DNI",
+      "fields": [
+        {"name": "expiry_date", "label": "FECHA CADUCIDAD (DNI)", "type": "date", "required": true},
+        {"name": "birth_date", "label": "FECHA NACIMIENTO", "type": "date", "required": true},
+        {"name": "address", "label": "DIRECCION", "type": "text", "required": true}
+      ]
+    },
+    "driving_license": {
+      "label": "CARNET DE CONDUCIR",
+      "fields": [
+        {"name": "expiry_date", "label": "FECHA CADUCIDAD (PERMISOS C O D)", "type": "date", "required": true},
+        {"name": "issue_date", "label": "FECHA OBTENCION", "type": "date", "required": true},
+        {"name": "address", "label": "DIRECCION", "type": "text", "required": true}
+      ]
+    },
+    "cap": {
+      "label": "CAP",
+      "fields": [
+        {"name": "expiry_date", "label": "FECHA CADUCIDAD", "type": "date", "required": true},
+        {"name": "course_number", "label": "Numero de curso (opcional)", "type": "text", "required": false}
+      ]
+    },
+    "tachograph_card": {
+      "label": "TARJETA TACOGRAFO",
+      "fields": [
+        {"name": "expiry_date", "label": "FECHA CADUCIDAD", "type": "date", "required": true}
+      ]
+    },
+    "power_of_attorney": {
+      "label": "POWER OF ATTORNEY",
+      "fields": [
+        {"name": "flag_fran", "label": "Flag FRAN", "type": "checkbox", "required": false},
+        {"name": "flag_ciusaba", "label": "Flag CIUSABA", "type": "checkbox", "required": false},
+        {"name": "expiry_fran", "label": "FECHA CADUCIDAD FRAN", "type": "date", "required": false},
+        {"name": "expiry_ciusaba", "label": "FECHA CADUCIDAD CIUSABA", "type": "date", "required": false}
+      ]
+    },
+    "other": {
+      "label": "OTHER",
+      "fields": [
+        {"name": "expiry_date", "label": "FECHA CADUCIDAD", "type": "date", "required": true},
+        {"name": "issue_date", "label": "FECHA OBTENCION (opcional)", "type": "date", "required": false}
+      ]
+    }
+  }
+}

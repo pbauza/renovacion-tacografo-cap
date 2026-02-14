@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Tools - {{ app_name }}{% endblock %}
+
+{% block content %}
+<section class="row g-3">
+  <div class="col-lg-6" id="create-client">
+    <div class="card h-100">
+      <div class="card-header"><h5 class="mb-0">Create New Client</h5></div>
+      <div class="card-body">
+        <form id="toolCreateClientForm" class="row g-2">
+          <div id="toolCreateClientFields" class="row g-2"></div>
+          <div class="col-12"><button class="btn btn-primary">Create</button></div>
+        </form>
+        <input id="toolCreatePhotoInput" type="file" accept="image/*,.pdf" class="d-none" />
+        <div class="drop-zone-lite mt-3" id="toolCreatePhotoDropzone">Drop client photo (image or PDF) here or click to select</div>
+        <img id="toolCreatePhotoPreview" class="img-fluid rounded border d-none mt-2" alt="Create preview" />
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-6" id="import-excel">
+    <div class="card h-100">
+      <div class="card-header"><h5 class="mb-0">Import Excel</h5></div>
+      <div class="card-body d-grid gap-2">
+        <input class="form-control" id="importFileInput" type="file" accept=".xlsx,.csv" />
+        <div class="d-flex gap-2">
+          <button class="btn btn-outline-primary" id="runImportBtn" type="button">Run Import</button>
+          <a class="btn btn-outline-secondary" href="/api/v1/tools/import/template">Download Template</a>
+        </div>
+        <pre id="importResult" class="logs-preview"></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-6" id="generate-report">
+    <div class="card h-100">
+      <div class="card-header"><h5 class="mb-0">Generate Bulk PDF</h5></div>
+      <div class="card-body d-flex flex-column gap-2">
+        <button class="btn btn-outline-secondary" id="generateBulkPdfBtn" type="button">Generate PDF Pack</button>
+        <pre id="pdfResult" class="logs-preview"></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="card h-100">
+      <div class="card-header d-flex justify-content-between align-items-center"><h5 class="mb-0">System Logs</h5><button class="btn btn-sm btn-outline-secondary" id="refreshLogsBtn" type="button">Refresh</button></div>
+      <div class="card-body">
+        <pre class="logs-preview" id="systemLogs">Loading logs...</pre>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
