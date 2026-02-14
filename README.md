@@ -341,5 +341,3 @@ Importante:
 - Confirmar formato permitido según operación (imagen/PDF o PDF de documento).
 
 ---
-
-Si quieres, el siguiente paso puede ser añadir una guía de despliegue productivo completa (Nginx + systemd + PostgreSQL + backup/restore) también en español dentro de este README.
