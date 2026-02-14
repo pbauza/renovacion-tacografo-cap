@@ -220,19 +220,40 @@ async def generate_client_pdf(client_id: int, session: AsyncSession = Depends(ge
 
 @router.post("/pdf/bulk")
 async def generate_bulk_pdf(session: AsyncSession = Depends(get_db_session)) -> dict:
-    docs = list(await session.scalars(select(Document).where(Document.pdf_path.is_not(None)).order_by(Document.created_at.asc())))
-    pdf_files = [doc.pdf_path for doc in docs if doc.pdf_path]
-
-    if not pdf_files:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="No PDF documents available")
-
     service = PdfGeneratorService()
+    clients = list(await session.scalars(select(Client).order_by(Client.created_at.asc())))
+    if not clients:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="No clients available")
+
+    individual_reports: list[Path] = []
+    for client in clients:
+        docs = list(await session.scalars(select(Document).where(Document.client_id == client.id).order_by(Document.created_at.asc())))
+        alerts = list(await session.scalars(select(Alert).where(Alert.client_id == client.id).order_by(Alert.alert_date.asc(), Alert.created_at.asc())))
+
+        report_name = service.default_output_name(prefix=f"cliente_{client.nif}")
+        report_path = Path("storage/exports") / "bulk_parts" / report_name
+        generated_report = service.generate_client_report(
+            output_path=report_path,
+            client=client,
+            documents=docs,
+            alerts=alerts,
+        )
+        individual_reports.append(generated_report)
+
     output_name = service.default_output_name(prefix="bulk_renovaciones")
     output_path = Path("storage/exports") / output_name
-    generated = service.generate_bundle(output_path=output_path, ordered_files=pdf_files)
-    log_event("generate_bulk_pdf", f"documents={len(pdf_files)}, output={generated.as_posix()}")
+    generated_bundle = service.generate_bundle(output_path=output_path, ordered_files=individual_reports)
+    log_event(
+        "generate_bulk_pdf",
+        f"clients={len(clients)}, reports={len(individual_reports)}, output={generated_bundle.as_posix()}",
+    )
 
-    return {"path": generated.as_posix(), "filename": generated.name, "documents": len(pdf_files)}
+    return {
+        "path": generated_bundle.as_posix(),
+        "filename": generated_bundle.name,
+        "clients": len(clients),
+        "reports": len(individual_reports),
+    }
 
 
 @router.get("/logs")
