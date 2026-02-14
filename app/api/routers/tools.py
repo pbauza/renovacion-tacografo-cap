@@ -4,6 +4,7 @@ from pathlib import Path
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from fastapi.responses import FileResponse
+from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -17,6 +18,75 @@ from app.services.audit_log_service import log_event, read_recent_logs
 from app.services.importer_service import ImportValidationError, SpreadsheetImporter, parse_document_type, to_bool, to_date
 
 router = APIRouter(prefix="/tools", tags=["tools"])
+
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
+CONFIG_ROOTS = [PROJECT_ROOT / "config", PROJECT_ROOT / "static/config"]
+
+
+class ConfigFileUpdate(BaseModel):
+    content: str
+
+
+def _resolve_config_path(raw_path: str) -> Path:
+    if not raw_path:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="path is required")
+
+    normalized = Path(raw_path.strip().lstrip("/"))
+    if normalized.suffix.lower() != ".json":
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Only .json files are allowed")
+
+    resolved = normalized.resolve()
+    for root in CONFIG_ROOTS:
+        root_resolved = root.resolve()
+        try:
+            resolved.relative_to(root_resolved)
+            return resolved
+        except ValueError:
+            continue
+    raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Path outside allowed config directories")
+
+
+@router.get("/config/files")
+async def list_config_files() -> dict:
+    files: list[str] = []
+    for root in CONFIG_ROOTS:
+        if not root.exists():
+            continue
+        for path in root.rglob("*.json"):
+            if path.is_file():
+                files.append(path.relative_to(PROJECT_ROOT).as_posix())
+    files.sort()
+    return {"files": files}
+
+
+@router.get("/config/file")
+async def get_config_file(path: str) -> dict:
+    target = _resolve_config_path(path)
+    if not target.exists():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Config file not found")
+
+    content = target.read_text(encoding="utf-8")
+    return {"path": target.relative_to(PROJECT_ROOT).as_posix(), "content": content}
+
+
+@router.put("/config/file")
+async def update_config_file(payload: ConfigFileUpdate, path: str) -> dict:
+    target = _resolve_config_path(path)
+    if not target.exists():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Config file not found")
+
+    try:
+        import json
+
+        parsed = json.loads(payload.content)
+    except Exception as exc:  # noqa: BLE001
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=f"Invalid JSON: {exc}") from exc
+
+    normalized = json.dumps(parsed, ensure_ascii=False, indent=2) + "\n"
+    target.write_text(normalized, encoding="utf-8")
+    rel_path = target.relative_to(PROJECT_ROOT).as_posix()
+    log_event("update_config_file", f"path={rel_path}")
+    return {"path": rel_path, "saved": True}
 
 
 @router.get("/import/template")

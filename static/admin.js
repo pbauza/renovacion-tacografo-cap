@@ -760,6 +760,218 @@
     await refreshLogs();
   }
 
+  async function bindSettingsPage() {
+    const container = document.getElementById("settingsConfigEditorContainer");
+    const statusEl = document.getElementById("settingsStatus");
+    const reloadFilesBtn = document.getElementById("settingsReloadFilesBtn");
+    const saveBtn = document.getElementById("settingsSaveBtn");
+
+    if (!container || !statusEl) return;
+
+    let configDocs = [];
+    const fieldRefs = new Map();
+    let fieldCounter = 0;
+
+    const setStatus = (message, isError = false) => {
+      statusEl.textContent = message;
+      statusEl.style.color = isError ? "#fecaca" : "#c9d7f2";
+    };
+
+    const cloneObj = (obj) => {
+      if (typeof structuredClone === "function") return structuredClone(obj);
+      return JSON.parse(JSON.stringify(obj));
+    };
+
+    const isPrimitive = (value) =>
+      value === null || ["string", "number", "boolean"].includes(typeof value);
+
+    function pathToText(segments) {
+      if (!segments.length) return "(root)";
+      return segments
+        .map((seg) => (typeof seg === "number" ? `[${seg}]` : seg))
+        .join(".");
+    }
+
+    function setBySegments(target, segments, value) {
+      let current = target;
+      for (let i = 0; i < segments.length - 1; i += 1) {
+        current = current[segments[i]];
+      }
+      current[segments[segments.length - 1]] = value;
+    }
+
+    function parseInputValue(inputEl, valueType) {
+      if (valueType === "boolean") return inputEl.checked;
+      if (valueType === "number") {
+        const raw = String(inputEl.value || "").trim();
+        return raw === "" ? 0 : Number(raw);
+      }
+      if (valueType === "nullable_string") return inputEl.value;
+      return inputEl.value;
+    }
+
+    function createFieldRow(fileIndex, segments, value) {
+      const row = document.createElement("div");
+      row.className = "row g-2 align-items-center border rounded p-2";
+
+      const colLabel = document.createElement("div");
+      colLabel.className = "col-lg-4";
+      const label = document.createElement("label");
+      label.className = "form-label mb-0";
+      label.textContent = pathToText(segments);
+      colLabel.appendChild(label);
+
+      const colInput = document.createElement("div");
+      colInput.className = "col-lg-8";
+
+      const typeName = value === null ? "nullable_string" : typeof value;
+      const id = `settingsField_${fieldCounter++}`;
+      let inputEl;
+
+      if (typeName === "boolean") {
+        inputEl = document.createElement("input");
+        inputEl.type = "checkbox";
+        inputEl.className = "form-check-input";
+        inputEl.id = id;
+        inputEl.checked = Boolean(value);
+      } else if (typeName === "number") {
+        inputEl = document.createElement("input");
+        inputEl.type = "number";
+        inputEl.className = "form-control";
+        inputEl.id = id;
+        inputEl.value = String(value);
+      } else {
+        inputEl = document.createElement("input");
+        inputEl.type = "text";
+        inputEl.className = "form-control";
+        inputEl.id = id;
+        inputEl.value = value == null ? "" : String(value);
+      }
+
+      fieldRefs.set(id, { fileIndex, segments: [...segments], valueType: typeName });
+      colInput.appendChild(inputEl);
+
+      row.appendChild(colLabel);
+      row.appendChild(colInput);
+      return row;
+    }
+
+    function walkFields(fileIndex, node, segments, mount) {
+      if (isPrimitive(node)) {
+        mount.appendChild(createFieldRow(fileIndex, segments, node));
+        return;
+      }
+
+      if (Array.isArray(node)) {
+        node.forEach((item, index) => walkFields(fileIndex, item, [...segments, index], mount));
+        return;
+      }
+
+      Object.entries(node).forEach(([key, value]) => {
+        walkFields(fileIndex, value, [...segments, key], mount);
+      });
+    }
+
+    function renderConfigEditor() {
+      container.innerHTML = "";
+      fieldRefs.clear();
+      fieldCounter = 0;
+
+      if (!configDocs.length) {
+        container.innerHTML = '<div class="text-muted">No editable JSON files found.</div>';
+        return;
+      }
+
+      configDocs.forEach((doc, fileIndex) => {
+        const card = document.createElement("section");
+        card.className = "card";
+
+        const header = document.createElement("div");
+        header.className = "card-header";
+        header.innerHTML = `<h6 class="mb-0">${doc.path}</h6>`;
+
+        const body = document.createElement("div");
+        body.className = "card-body d-grid gap-2";
+        walkFields(fileIndex, doc.data, [], body);
+
+        card.appendChild(header);
+        card.appendChild(body);
+        container.appendChild(card);
+      });
+    }
+
+    async function loadFilesAndContents() {
+      const result = await api("/tools/config/files");
+      const files = result.files || [];
+
+      configDocs = [];
+      for (const path of files) {
+        const fileResult = await api(`/tools/config/file?path=${encodeURIComponent(path)}`);
+        let parsed;
+        try {
+          parsed = JSON.parse(fileResult.content || "{}");
+        } catch (err) {
+          setStatus(`Invalid JSON in ${path}: ${err.message}`, true);
+          continue;
+        }
+        configDocs.push({ path, data: parsed });
+      }
+
+      renderConfigEditor();
+      setStatus(`Loaded ${configDocs.length} config files and rendered editable fields.`);
+    }
+
+    if (reloadFilesBtn) {
+      reloadFilesBtn.addEventListener("click", () => {
+        loadFilesAndContents().catch((err) => setStatus(`Error loading config files: ${err.message}`, true));
+      });
+    }
+
+    if (saveBtn) {
+      saveBtn.addEventListener("click", async () => {
+        try {
+          if (!configDocs.length) {
+            setStatus("No config files loaded to save.", true);
+            return;
+          }
+
+          const nextDocs = configDocs.map((doc) => ({ path: doc.path, data: cloneObj(doc.data) }));
+
+          fieldRefs.forEach((meta, fieldId) => {
+            const inputEl = document.getElementById(fieldId);
+            if (!inputEl) return;
+            const nextValue = parseInputValue(inputEl, meta.valueType);
+            setBySegments(nextDocs[meta.fileIndex].data, meta.segments, nextValue);
+          });
+
+          for (const doc of nextDocs) {
+            const normalized = JSON.stringify(doc.data, null, 2) + "\n";
+            await api(`/tools/config/file?path=${encodeURIComponent(doc.path)}`, {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ content: normalized }),
+            });
+          }
+
+          configDocs = nextDocs;
+          renderConfigEditor();
+          setStatus(`Saved ${configDocs.length} config files successfully.`);
+        } catch (err) {
+          setStatus(`Save error: ${err.message}`, true);
+        }
+      });
+    }
+
+    try {
+      await loadFilesAndContents();
+      if (!configDocs.length) {
+        setStatus("No editable JSON files found in config/ or static/config/.", true);
+      }
+    } catch (err) {
+      setStatus(`Error loading configuration editor: ${err.message}`, true);
+    }
+  }
+
   async function loadSchemas() {
     const [clientSchema, alertSchema, docSchema] = await Promise.all([
       loadJSON("/static/config/forms/client.json"),
@@ -794,6 +1006,10 @@
     }
     if (page === "tools") {
       await bindToolsPage();
+      return;
+    }
+    if (page === "settings") {
+      await bindSettingsPage();
       return;
     }
   }
