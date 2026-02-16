@@ -323,10 +323,11 @@ pip install -r requirements.txt
 Desde PowerShell:
 
 ```powershell
-pyinstaller --onefile --name renovaciones-app \
-  --add-data "templates;templates" \
-  --add-data "static;static" \
-  --add-data "config;config" \
+pyinstaller --onedir --name renovaciones-app ^
+  --add-data "templates;templates" ^
+  --add-data "static;static" ^
+  --add-data "config;config" ^
+  --hidden-import=aiosqlite ^
   main.py
 ```
 
