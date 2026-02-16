@@ -1,7 +1,7 @@
 from app.schemas.alert import AlertCreate, AlertRead, AlertUpdate
 from app.schemas.client import ClientCreate, ClientRead, ClientUpdate
 from app.schemas.document import DocumentCreate, DocumentRead, DocumentUpdate
-from app.schemas.reporting import DashboardSummary
+from app.schemas.reporting import DashboardSummary, RenewedDocumentItem, RenewedDocumentsReport
 
 __all__ = [
     "AlertCreate",
@@ -14,4 +14,6 @@ __all__ = [
     "DocumentCreate",
     "DocumentRead",
     "DocumentUpdate",
+    "RenewedDocumentItem",
+    "RenewedDocumentsReport",
 ]

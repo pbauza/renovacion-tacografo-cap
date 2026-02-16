@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     uvicorn_reload: bool = False
     database_url: str = Field(
         default="sqlite+aiosqlite:///./renovaciones.db",
-        description="Async SQLAlchemy URL. Example: postgresql+asyncpg://user:pass@host/db",
+        description="URL async de SQLAlchemy. Ejemplo: postgresql+asyncpg://usuario:clave@host/bd",
     )
     scheduler_enabled: bool = True
     reset_db_on_startup: bool = False

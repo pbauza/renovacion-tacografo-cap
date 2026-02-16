@@ -1,29 +1,29 @@
 {% extends "base.html" %}
 
-{% block title %}Documents - {{ app_name }}{% endblock %}
+{% block title %}Documentos - {{ app_name }}{% endblock %}
 
 {% block content %}
 <section class="row g-3 mb-3">
   <div class="col-lg-6">
     <div class="card h-100">
-      <div class="card-header"><h5 class="mb-0">Upload / Create Document</h5></div>
+      <div class="card-header"><h5 class="mb-0">Cargar / crear documento</h5></div>
       <div class="card-body">
         <form id="documentCreateForm" class="row g-2">
           <input type="hidden" name="document_id" />
           <div class="col-12">
-            <label class="form-label mb-1">Buscar cliente por DNI o nombre</label>
-            <input class="form-control" id="documentClientFinder" placeholder="Ej: 12345678A o Pedro" autocomplete="off" />
+            <label class="form-label mb-1">Buscar cliente (nombre, NIF, telefono, empresa o curso CAP)</label>
+            <input class="form-control" id="documentClientFinder" placeholder="Ej: 12345678A, Pedro o CURSO-44" autocomplete="off" />
             <div id="documentClientFinderResults" class="list-group mt-1 d-none"></div>
           </div>
           <div class="col-12 d-none" id="documentEditBanner">
             <div class="alert alert-primary py-2 px-3 mb-1 d-flex justify-content-between align-items-center">
-              <span>Editing document <strong id="documentEditingIdText"></strong></span>
-              <button class="btn btn-sm btn-outline-primary" id="cancelDocumentEditBtn" type="button">Cancel edit</button>
+              <span>Editando documento <strong id="documentEditingIdText"></strong></span>
+              <button class="btn btn-sm btn-outline-primary" id="cancelDocumentEditBtn" type="button">Cancelar edicion</button>
             </div>
           </div>
           <div class="col-md-6">
-            <label class="form-label mb-1">Client ID</label>
-            <input class="form-control" name="client_id" placeholder="Client ID" required />
+            <label class="form-label mb-1">ID de cliente</label>
+            <input class="form-control" name="client_id" placeholder="ID de cliente" required />
           </div>
           <div class="col-md-6">
             <label class="form-label mb-1">Tipo de documento</label>
@@ -31,9 +31,9 @@
               <option value="dni">DNI</option>
               <option value="driving_license">Carnet de conducir</option>
               <option value="cap">CAP</option>
-              <option value="tachograph_card">Tarjeta tacografo</option>
-              <option value="power_of_attorney">Power of Attorney</option>
-              <option value="other">Other</option>
+              <option value="tachograph_card">Tarjeta de tacografo</option>
+              <option value="power_of_attorney">Poder notarial</option>
+              <option value="other">Otro</option>
             </select>
           </div>
 
@@ -41,9 +41,9 @@
           <div id="documentDynamicFields" class="row g-2"></div>
 
           <div class="col-12 d-flex gap-2 align-items-end">
-            <button class="btn btn-primary" id="documentSubmitBtn" type="submit">Create Document</button>
+            <button class="btn btn-primary" id="documentSubmitBtn" type="submit">Crear documento</button>
             <div class="w-100">
-              <label class="form-label mb-1">DOCUMENTO PDF</label>
+              <label class="form-label mb-1">PDF del documento</label>
               <input class="form-control" id="documentPdfUpload" type="file" accept="application/pdf" />
             </div>
           </div>
@@ -54,14 +54,14 @@
 
   <div class="col-lg-6">
     <div class="card h-100">
-      <div class="card-header"><h5 class="mb-0">Document Search</h5></div>
+      <div class="card-header"><h5 class="mb-0">Busqueda de documentos</h5></div>
       <div class="card-body">
         <form id="documentsFilterForm" class="d-flex flex-wrap gap-2">
-          <input class="form-control flex-fill min-w-220" name="q" placeholder="Search by client / document" />
-          <select class="form-select w-auto" name="doc_type"><option value="">Document type</option><option value="dni">DNI</option><option value="driving_license">Driving license</option><option value="cap">CAP</option><option value="tachograph_card">Tachograph</option><option value="power_of_attorney">Power of attorney</option><option value="other">Other</option></select>
-          <select class="form-select w-auto" name="expiration_status"><option value="">Expiration status</option><option value="expired">Expired</option><option value="expiring">Expiring</option><option value="ok">OK</option></select>
-          <input class="form-control w-auto" name="client_id" placeholder="Client ID" />
-          <button class="btn btn-primary" type="submit">Search</button>
+          <input class="form-control flex-fill min-w-220" name="q" placeholder="Buscar por cliente, tipo o curso" />
+          <select class="form-select w-auto" name="doc_type"><option value="">Tipo de documento</option><option value="dni">DNI</option><option value="driving_license">Carnet de conducir</option><option value="cap">CAP</option><option value="tachograph_card">Tacografo</option><option value="power_of_attorney">Poder notarial</option><option value="other">Otro</option></select>
+          <select class="form-select w-auto" name="expiration_status"><option value="">Estado de caducidad</option><option value="expired">Caducado</option><option value="expiring">Proximo a caducar</option><option value="ok">Vigente</option></select>
+          <input class="form-control w-auto" name="client_id" placeholder="ID de cliente" />
+          <button class="btn btn-primary" type="submit">Buscar</button>
         </form>
       </div>
     </div>
@@ -72,12 +72,12 @@
   <div class="col-xl-7">
     <div class="card h-100">
       <div class="card-header d-flex justify-content-between align-items-center">
-        <h5 class="mb-0">Expiring Documents</h5>
-        <button class="btn btn-sm btn-outline-secondary" id="refreshDocumentsBtn" type="button">Refresh</button>
+        <h5 class="mb-0">Documentos con vencimiento</h5>
+        <button class="btn btn-sm btn-outline-secondary" id="refreshDocumentsBtn" type="button">Actualizar</button>
       </div>
-      <div class="table-responsive">
+      <div class="table-responsive table-scroll-y">
         <table class="table mb-0">
-          <thead><tr><th>ID</th><th>Client</th><th>Type</th><th>Expiration</th><th>PDF</th><th>Actions</th></tr></thead>
+          <thead><tr><th>ID</th><th>Cliente</th><th>Tipo</th><th>Caducidad</th><th>PDF</th><th>Acciones</th></tr></thead>
           <tbody id="documentsTableBody"></tbody>
         </table>
       </div>
@@ -86,8 +86,42 @@
 
   <div class="col-xl-5">
     <div class="card h-100">
-      <div class="card-header"><h5 class="mb-0">Missing Documentation Report</h5></div>
-      <div class="card-body" id="missingDocsReport">No data loaded.</div>
+      <div class="card-header"><h5 class="mb-0">Informe de documentacion pendiente</h5></div>
+      <div class="card-body" id="missingDocsReport">No hay datos cargados.</div>
+    </div>
+  </div>
+</section>
+
+<section class="card mt-3">
+  <div class="card-header"><h5 class="mb-0">Renovados con nosotros (CAP/Tacografo)</h5></div>
+  <div class="card-body d-grid gap-2">
+    <form id="renewalsFilterForm" class="d-flex flex-wrap gap-2">
+      <input class="form-control w-auto" type="number" min="2000" max="2100" name="year" placeholder="Anio" />
+      <select class="form-select w-auto" name="doc_type">
+        <option value="">Tipo: todos</option>
+        <option value="cap">CAP</option>
+        <option value="tachograph_card">Tacografo</option>
+      </select>
+      <select class="form-select w-auto" name="payment_method">
+        <option value="">Forma de pago: todas</option>
+        <option value="efectivo">Efectivo</option>
+        <option value="visa">VISA</option>
+        <option value="empresa">Empresa</option>
+      </select>
+      <select class="form-select w-auto" name="fundae">
+        <option value="">FUNDAE: todos</option>
+        <option value="true">FUNDAE: Si</option>
+        <option value="false">FUNDAE: No</option>
+      </select>
+      <button class="btn btn-primary" type="submit">Filtrar</button>
+      <button class="btn btn-outline-secondary" id="refreshRenewalsBtn" type="button">Actualizar</button>
+    </form>
+    <div id="renewalsSummary" class="small text-muted">Sin datos.</div>
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead><tr><th>ID doc</th><th>Cliente</th><th>Tipo</th><th>Caducidad</th><th>Pago</th><th>FUNDAE</th><th>N. operacion</th><th>Alta</th></tr></thead>
+        <tbody id="renewalsTableBody"></tbody>
+      </table>
     </div>
   </div>
 </section>

@@ -130,6 +130,11 @@ body {
 
 .min-w-220 { min-width: 220px; }
 
+.table-scroll-y {
+  max-height: 360px;
+  overflow-y: auto;
+}
+
 .drop-zone-lite {
   border: 2px dashed #9db1cc;
   border-radius: 10px;
@@ -175,6 +180,12 @@ body {
   cursor: pointer;
 }
 
+#toolCreatePhotoPreview {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+}
+
 @media (max-width: 991px) {
   .sidebar-shell {
     position: fixed;
@@ -185,5 +196,9 @@ body {
 
   .sidebar-shell.open {
     transform: translateX(0);
+  }
+
+  .table-scroll-y {
+    max-height: 280px;
   }
 }

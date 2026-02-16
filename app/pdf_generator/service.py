@@ -28,7 +28,7 @@ class PdfGeneratorService:
     def generate_bundle(self, output_path: str | Path, ordered_files: list[str | Path]) -> Path:
         target = Path(output_path)
         if not ordered_files:
-            raise ValueError("ordered_files cannot be empty")
+            raise ValueError("ordered_files no puede estar vacio")
 
         target.parent.mkdir(parents=True, exist_ok=True)
         writer = PdfWriter()
@@ -247,8 +247,8 @@ class PdfGeneratorService:
                 ["Fecha de nacimiento", _fmt_official_date(getattr(doc, "birth_date", None))],
                 ["Direccion", str(getattr(doc, "address", "") or "-")],
                 ["Numero de curso", str(getattr(doc, "course_number", "") or "-")],
-                ["Flag FRAN", "Si" if bool(getattr(doc, "flag_fran", False)) else "No"],
-                ["Flag CIUSABA", "Si" if bool(getattr(doc, "flag_ciusaba", False)) else "No"],
+                ["Apoderamiento Fran", "Si" if bool(getattr(doc, "flag_fran", False)) else "No"],
+                ["Apoderamiento CIUSABA", "Si" if bool(getattr(doc, "flag_ciusaba", False)) else "No"],
                 ["Caducidad FRAN", _fmt_official_date(getattr(doc, "expiry_fran", None))],
                 ["Caducidad CIUSABA", _fmt_official_date(getattr(doc, "expiry_ciusaba", None))],
                 ["Archivo del documento", str(getattr(doc, "pdf_path", "") or "-")],
@@ -557,7 +557,7 @@ def _human_doc_type(raw: str) -> str:
         "driving_license": "Carnet de conducir",
         "cap": "CAP",
         "tachograph_card": "Tarjeta tacografo",
-        "power_of_attorney": "Power of Attorney",
+        "power_of_attorney": "Poder notarial",
         "other": "Otro",
     }
     return mapping.get(str(raw), str(raw))
@@ -572,7 +572,7 @@ def _expiration_status(value: Any) -> str:
         try:
             value = datetime.fromisoformat(str(value)).date()
         except Exception:  # noqa: BLE001
-            return "Unknown"
+            return "Desconocido"
     today = date.today()
     if value < today:
         return "Caducado"

@@ -16,6 +16,17 @@ class DocumentType(str, enum.Enum):
     OTHER = "other"
 
 
+class PaymentMethod(str, enum.Enum):
+    EFECTIVO = "efectivo"
+    VISA = "visa"
+    EMPRESA = "empresa"
+
+
+class FundaePaymentType(str, enum.Enum):
+    RECIBO = "recibo"
+    TRANSFERENCIA = "transferencia"
+
+
 class Document(Base):
     __tablename__ = "documents"
 
@@ -34,6 +45,18 @@ class Document(Base):
     pdf_path: Mapped[str | None] = mapped_column(String(500), nullable=True)
 
     course_number: Mapped[str | None] = mapped_column(String(128), nullable=True)
+
+    renewed_with_us: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    payment_method: Mapped[PaymentMethod | None] = mapped_column(
+        Enum(PaymentMethod, name="payment_method_enum"),
+        nullable=True,
+    )
+    fundae: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    fundae_payment_type: Mapped[FundaePaymentType | None] = mapped_column(
+        Enum(FundaePaymentType, name="fundae_payment_type_enum"),
+        nullable=True,
+    )
+    operation_number: Mapped[str | None] = mapped_column(String(128), nullable=True)
 
     flag_fran: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     flag_ciusaba: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)

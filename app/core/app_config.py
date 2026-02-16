@@ -14,7 +14,7 @@ class UIConfig(BaseModel):
 
 
 class PDFConfig(BaseModel):
-    report_title: str = "Client Renewal Report"
+    report_title: str = "Informe de renovaciones de cliente"
     organization_name: str = "Renovaciones Tacografo CAP"
     contact_email: str = "contact@renovaciones.local"
     contact_phone: str = "+34 000 000 000"
@@ -22,7 +22,7 @@ class PDFConfig(BaseModel):
 
 class AppJSONConfig(BaseModel):
     app_name: str = "Renovaciones Tacografo CAP"
-    workspace_subtitle: str = "Tacograph + CAP management workspace"
+    workspace_subtitle: str = "Espacio de gestion de Tacografo y CAP"
     ui: UIConfig = Field(default_factory=UIConfig)
     pdf: PDFConfig = Field(default_factory=PDFConfig)
 

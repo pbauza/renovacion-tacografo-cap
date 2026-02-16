@@ -7,6 +7,7 @@
     clients: [],
     documents: [],
     alerts: [],
+    renewalsFilters: "",
     selectedClient: null,
     pendingCreatePhotoFile: null,
     schemas: {
@@ -14,6 +15,24 @@
       alert: null,
       documentTypes: null,
     },
+  };
+
+  const DOC_TYPE_LABELS = {
+    dni: "DNI",
+    driving_license: "Carnet de conducir",
+    cap: "CAP",
+    tachograph_card: "Tarjeta de tacografo",
+    power_of_attorney: "Poder notarial",
+    other: "Otro",
+  };
+  const PAYMENT_METHOD_LABELS = {
+    efectivo: "Efectivo",
+    visa: "VISA",
+    empresa: "Empresa",
+  };
+  const FUNDAE_PAYMENT_TYPE_LABELS = {
+    recibo: "Recibo",
+    transferencia: "Transferencia",
   };
 
   const toggle = document.getElementById("sidebarToggle");
@@ -43,7 +62,7 @@
 
   async function loadJSON(path) {
     const response = await fetch(path);
-    if (!response.ok) throw new Error(`Cannot load ${path}`);
+    if (!response.ok) throw new Error(`No se puede cargar ${path}`);
     return response.json();
   }
 
@@ -54,6 +73,33 @@
 
   function renderEmptyRow(colspan, text) {
     return `<tr><td colspan="${colspan}" class="text-muted text-center py-4">${text}</td></tr>`;
+  }
+
+  function humanDocType(value) {
+    return DOC_TYPE_LABELS[String(value || "").toLowerCase()] || String(value || "--");
+  }
+
+  function humanPaymentMethod(value) {
+    return PAYMENT_METHOD_LABELS[String(value || "").toLowerCase()] || String(value || "--");
+  }
+
+  function humanFundaePaymentType(value) {
+    return FUNDAE_PAYMENT_TYPE_LABELS[String(value || "").toLowerCase()] || (value ? String(value) : "--");
+  }
+
+  function humanFundaeInfo(fundae, fundaePaymentType) {
+    const base = fundae ? "Si" : "No";
+    const paymentType = humanFundaePaymentType(fundaePaymentType);
+    return paymentType === "--" ? base : `${base} (${paymentType})`;
+  }
+
+  function formatDate(value) {
+    if (!value) return "";
+    try {
+      return new Date(value).toLocaleDateString("es-ES");
+    } catch (_) {
+      return String(value);
+    }
   }
 
   function installDropzone(zoneId, onFile) {
@@ -110,6 +156,15 @@
 
     if (field.type === "checkbox") {
       return `<div class="${colClass}"><label class="form-label mb-1">${field.label}</label><div class="form-check"><input class="form-check-input" type="checkbox" name="${name}" id="${name}"><label class="form-check-label" for="${name}">${field.label}</label></div></div>`;
+    }
+
+    if (field.type === "select") {
+      const placeholder = field.placeholder || "Selecciona una opcion";
+      const options = Array.isArray(field.options) ? field.options : [];
+      const optionsHTML = options
+        .map((option) => `<option value="${option.value}">${option.label}</option>`)
+        .join("");
+      return `<div class="${colClass}"><label class="form-label mb-1" for="${name}">${field.label}</label><select class="form-select" id="${name}" name="${name}" ${field.required ? "required" : ""}><option value="">${placeholder}</option>${optionsHTML}</select></div>`;
     }
 
     const inputType = field.type === "number" ? "number" : field.type === "email" ? "email" : field.type === "date" ? "date" : "text";
@@ -175,6 +230,50 @@
     }
 
     container.innerHTML = typeDef.fields.map((field) => createFieldHTML(field)).join("");
+    syncPaymentFieldsVisibility();
+  }
+
+  function syncPaymentFieldsVisibility() {
+    const form = document.getElementById("documentCreateForm");
+    if (!form) return;
+
+    const renewedInput = form.querySelector("[name=renewed_with_us]");
+    const paymentInput = form.querySelector("[name=payment_method]");
+    const fundaeInput = form.querySelector("[name=fundae]");
+    const fundaeTypeInput = form.querySelector("[name=fundae_payment_type]");
+    const operationInput = form.querySelector("[name=operation_number]");
+
+    const renewed = renewedInput ? renewedInput.checked : false;
+    const isEmpresa = renewed && paymentInput && paymentInput.value === "empresa";
+    const showEmpresaDetails = isEmpresa;
+    const paymentEnabled = renewed && Boolean(paymentInput);
+
+    if (paymentInput) {
+      paymentInput.disabled = !paymentEnabled;
+      paymentInput.required = paymentEnabled;
+      const wrapper = paymentInput.closest(".col-md-6");
+      if (wrapper) wrapper.style.display = renewed ? "" : "none";
+      if (!renewed) paymentInput.value = "";
+    }
+    if (fundaeInput) {
+      fundaeInput.disabled = !isEmpresa;
+      const wrapper = fundaeInput.closest(".col-md-6");
+      if (wrapper) wrapper.style.display = isEmpresa ? "" : "none";
+      if (!isEmpresa) fundaeInput.checked = false;
+    }
+    if (fundaeTypeInput) {
+      fundaeTypeInput.disabled = !showEmpresaDetails;
+      fundaeTypeInput.required = false;
+      const wrapper = fundaeTypeInput.closest(".col-md-6");
+      if (wrapper) wrapper.style.display = showEmpresaDetails ? "" : "none";
+      if (!showEmpresaDetails) fundaeTypeInput.value = "";
+    }
+    if (operationInput) {
+      operationInput.disabled = !showEmpresaDetails;
+      const wrapper = operationInput.closest(".col-md-6");
+      if (wrapper) wrapper.style.display = showEmpresaDetails ? "" : "none";
+      if (!showEmpresaDetails) operationInput.value = "";
+    }
   }
 
   function resetDocumentForm(createForm, docTypeSelect) {
@@ -188,7 +287,7 @@
     const submitBtn = document.getElementById("documentSubmitBtn");
     const tableBody = document.getElementById("documentsTableBody");
     if (editBanner) editBanner.classList.add("d-none");
-    if (submitBtn) submitBtn.textContent = "Create Document";
+    if (submitBtn) submitBtn.textContent = "Crear documento";
     if (tableBody) tableBody.querySelectorAll("tr").forEach((row) => row.classList.remove("table-active"));
 
     if (docTypeSelect) {
@@ -228,7 +327,8 @@
     const submitBtn = document.getElementById("documentSubmitBtn");
     if (editBanner) editBanner.classList.remove("d-none");
     if (editIdText) editIdText.textContent = `#${documentData.id}`;
-    if (submitBtn) submitBtn.textContent = "Update Document";
+    if (submitBtn) submitBtn.textContent = "Actualizar documento";
+    syncPaymentFieldsVisibility();
   }
 
   async function refreshHeaderStats() {
@@ -253,7 +353,7 @@
     if (!bodyEl) return;
 
     if (!state.clients.length) {
-      bodyEl.innerHTML = renderEmptyRow(6, "No clients found.");
+      bodyEl.innerHTML = renderEmptyRow(6, "No se encontraron clientes.");
       return;
     }
 
@@ -306,7 +406,7 @@
     if (!tbody) return;
 
     if (!state.documents.length) {
-      tbody.innerHTML = renderEmptyRow(6, "No documents found.");
+      tbody.innerHTML = renderEmptyRow(6, "No se encontraron documentos.");
       return;
     }
 
@@ -317,10 +417,10 @@
         return `<tr>
           <td>${d.id}</td>
           <td>${client ? `${client.full_name} (${client.nif})` : d.client_id}</td>
-          <td>${d.doc_type}</td>
+          <td>${humanDocType(d.doc_type)}</td>
           <td>${d.expiry_date ?? ""}</td>
-          <td>${d.pdf_path ? "yes" : "no"}</td>
-          <td><button class="btn btn-sm btn-outline-danger" data-delete-doc="${d.id}">Delete</button></td>
+          <td>${d.pdf_path ? "Si" : "No"}</td>
+          <td><button class="btn btn-sm btn-outline-danger" data-delete-doc="${d.id}">Eliminar</button></td>
         </tr>`;
       })
       .join("");
@@ -342,7 +442,7 @@
       btn.addEventListener("click", async (event) => {
         event.stopPropagation();
         const id = Number(btn.dataset.deleteDoc);
-        if (!confirm(`Delete document ${id}?`)) return;
+        if (!confirm(`¿Eliminar documento ${id}?`)) return;
         await api(`/documents/${id}`, { method: "DELETE" });
         await refreshDocumentsPage();
       });
@@ -361,12 +461,12 @@
     }, {});
 
     if (!Object.keys(byType).length) {
-      report.textContent = "No missing PDF documents.";
+      report.textContent = "No hay documentos PDF pendientes.";
       return;
     }
 
     report.innerHTML = `<ul class="list-group list-group-flush">${Object.entries(byType)
-      .map(([type, count]) => `<li class="list-group-item d-flex justify-content-between"><span>${type}</span><span class="badge text-bg-danger">${count}</span></li>`)
+      .map(([type, count]) => `<li class="list-group-item d-flex justify-content-between"><span>${humanDocType(type)}</span><span class="badge text-bg-danger">${count}</span></li>`)
       .join("")}</ul>`;
   }
 
@@ -380,7 +480,7 @@
 
     if (tbody) {
       if (!state.alerts.length) {
-        tbody.innerHTML = renderEmptyRow(6, "No alerts found.");
+        tbody.innerHTML = renderEmptyRow(6, "No se encontraron alertas.");
       } else {
         tbody.innerHTML = state.alerts
           .map((a) => {
@@ -389,10 +489,10 @@
             return `<tr>
               <td>${a.id}</td>
               <td>${client ? client.full_name : a.client_id}</td>
-              <td>${doc ? doc.doc_type : "--"}</td>
+              <td>${doc ? humanDocType(doc.doc_type) : "--"}</td>
               <td>${a.expiry_date}</td>
               <td>${a.alert_date}</td>
-              <td><a class="btn btn-sm btn-outline-secondary" href="/clients?client_id=${a.client_id}">View Client</a></td>
+              <td><a class="btn btn-sm btn-outline-secondary" href="/clients?client_id=${a.client_id}">Ver cliente</a></td>
             </tr>`;
           })
           .join("");
@@ -405,10 +505,44 @@
         ? top.map((a) => {
             const client = clientById[a.client_id];
             const doc = a.document_id ? docById[a.document_id] : null;
-            return `<tr><td>${client ? client.full_name : a.client_id}</td><td>${doc ? doc.doc_type : "--"}</td><td>${a.expiry_date}</td><td>${a.alert_date}</td></tr>`;
+            return `<tr><td>${client ? client.full_name : a.client_id}</td><td>${doc ? humanDocType(doc.doc_type) : "--"}</td><td>${a.expiry_date}</td><td>${a.alert_date}</td></tr>`;
           }).join("")
-        : renderEmptyRow(4, "No alerts loaded yet.");
+        : renderEmptyRow(4, "Aun no hay alertas cargadas.");
     }
+  }
+
+  async function loadRenewalsReport(filters = "") {
+    const tableBody = document.getElementById("renewalsTableBody");
+    const summary = document.getElementById("renewalsSummary");
+    if (!tableBody || !summary) return;
+
+    const query = filters || state.renewalsFilters || "";
+    state.renewalsFilters = query;
+
+    const report = await api(`/reporting/renewals${query ? `?${query}` : ""}`);
+    const byTypeText = Object.entries(report.by_doc_type || {})
+      .map(([docType, count]) => `${humanDocType(docType)}: ${count}`)
+      .join(" | ");
+
+    summary.textContent = `Anio ${report.year} · Total ${report.total}${byTypeText ? ` · ${byTypeText}` : ""}`;
+
+    if (!report.items.length) {
+      tableBody.innerHTML = renderEmptyRow(8, "No hay renovaciones con nosotros para este filtro.");
+      return;
+    }
+
+    tableBody.innerHTML = report.items
+      .map((item) => `<tr>
+        <td>${item.document_id}</td>
+        <td>${item.client_name} (${item.client_nif})</td>
+        <td>${humanDocType(item.doc_type)}</td>
+        <td>${item.expiry_date ?? ""}</td>
+        <td>${humanPaymentMethod(item.payment_method)}</td>
+        <td>${humanFundaeInfo(item.fundae, item.fundae_payment_type)}</td>
+        <td>${item.operation_number ?? ""}</td>
+        <td>${formatDate(item.created_at)}</td>
+      </tr>`)
+      .join("");
   }
 
   function renderDashboardClients() {
@@ -417,7 +551,7 @@
     const rows = state.clients.slice(0, 10);
     tbody.innerHTML = rows.length
       ? rows.map((c) => `<tr><td>${c.id}</td><td>${c.full_name}</td><td>${c.nif}</td><td>${c.company ?? ""}</td></tr>`).join("")
-      : renderEmptyRow(4, "No clients loaded yet.");
+      : renderEmptyRow(4, "Aun no hay clientes cargados.");
   }
 
   function renderDashboardDocuments() {
@@ -426,8 +560,8 @@
     const clientById = Object.fromEntries(state.clients.map((c) => [c.id, c]));
     const rows = state.documents.slice(0, 10);
     tbody.innerHTML = rows.length
-      ? rows.map((d) => `<tr><td>${d.id}</td><td>${clientById[d.client_id]?.full_name ?? d.client_id}</td><td>${d.doc_type}</td><td>${d.expiry_date ?? ""}</td></tr>`).join("")
-      : renderEmptyRow(4, "No documents loaded yet.");
+      ? rows.map((d) => `<tr><td>${d.id}</td><td>${clientById[d.client_id]?.full_name ?? d.client_id}</td><td>${humanDocType(d.doc_type)}</td><td>${d.expiry_date ?? ""}</td></tr>`).join("")
+      : renderEmptyRow(4, "Aun no hay documentos cargados.");
   }
 
   async function refreshDashboardPage() {
@@ -446,6 +580,7 @@
 
   async function refreshDocumentsPage(filters = "") {
     await Promise.all([loadClients(), loadDocuments(filters)]);
+    await loadRenewalsReport(state.renewalsFilters);
   }
 
   async function bindClientsPage() {
@@ -480,7 +615,7 @@
     if (deleteBtn) {
       deleteBtn.addEventListener("click", async () => {
         const id = Number(document.getElementById("selectedClientId")?.value || "0");
-        if (!id || !confirm(`Delete client ${id}?`)) return;
+        if (!id || !confirm(`¿Eliminar cliente ${id}?`)) return;
         await api(`/clients/${id}`, { method: "DELETE" });
         await refreshClientsPage();
       });
@@ -510,7 +645,7 @@
         const id = Number(document.getElementById("selectedClientId")?.value || "0");
         if (!id) return;
         const result = await api(`/tools/pdf/client/${id}`, { method: "POST" });
-        alert(`PDF generated: ${result.path}`);
+        alert(`PDF generado: ${result.path}`);
       });
     }
 
@@ -564,11 +699,30 @@
     const finderInput = document.getElementById("documentClientFinder");
     const finderResults = document.getElementById("documentClientFinderResults");
     const cancelEditBtn = document.getElementById("cancelDocumentEditBtn");
+    const renewalsFilterForm = document.getElementById("renewalsFilterForm");
+    const refreshRenewalsBtn = document.getElementById("refreshRenewalsBtn");
+    if (renewalsFilterForm) {
+      const yearInput = renewalsFilterForm.querySelector("[name=year]");
+      if (yearInput && !yearInput.value) {
+        yearInput.value = String(new Date().getFullYear());
+      }
+      state.renewalsFilters = new URLSearchParams(getFormValues(renewalsFilterForm)).toString();
+    }
 
     const docTypeSelect = createForm ? createForm.querySelector("[name=doc_type]") : null;
     if (docTypeSelect && state.schemas.documentTypes) {
       renderDocumentDynamicFields(docTypeSelect.value);
       docTypeSelect.addEventListener("change", () => renderDocumentDynamicFields(docTypeSelect.value));
+    }
+    if (createForm) {
+      createForm.addEventListener("change", (event) => {
+        const target = event.target;
+        if (!target || !(target instanceof HTMLElement)) return;
+        const fieldName = target.getAttribute("name");
+        if (fieldName === "renewed_with_us" || fieldName === "payment_method" || fieldName === "fundae") {
+          syncPaymentFieldsVisibility();
+        }
+      });
     }
 
     async function runClientFinder(query) {
@@ -581,14 +735,14 @@
 
       const clients = await api(`/clients?q=${encodeURIComponent(query.trim())}`);
       if (!clients.length) {
-        finderResults.innerHTML = '<div class="list-group-item text-muted">No clients found</div>';
+        finderResults.innerHTML = '<div class="list-group-item text-muted">No se encontraron clientes</div>';
         finderResults.classList.remove("d-none");
         return;
       }
 
       finderResults.innerHTML = clients
         .slice(0, 8)
-        .map((c) => `<button type="button" class="list-group-item list-group-item-action" data-client-id="${c.id}" data-client-name="${c.full_name}" data-client-nif="${c.nif}">${c.full_name} (${c.nif})${c.company ? ` - ${c.company}` : ""}</button>`)
+        .map((c) => `<button type="button" class="list-group-item list-group-item-action" data-client-id="${c.id}" data-client-name="${c.full_name}" data-client-nif="${c.nif}">${c.full_name} (${c.nif})${c.phone ? ` · ${c.phone}` : ""}${c.company ? ` · ${c.company}` : ""}</button>`)
         .join("");
 
       finderResults.classList.remove("d-none");
@@ -667,7 +821,16 @@
       });
     }
 
+    if (renewalsFilterForm) {
+      renewalsFilterForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const filters = new URLSearchParams(getFormValues(renewalsFilterForm)).toString();
+        await loadRenewalsReport(filters);
+      });
+    }
+
     if (refreshBtn) refreshBtn.addEventListener("click", async () => refreshDocumentsPage());
+    if (refreshRenewalsBtn) refreshRenewalsBtn.addEventListener("click", async () => loadRenewalsReport(state.renewalsFilters));
 
     resetDocumentForm(createForm, docTypeSelect);
     await refreshDocumentsPage();
@@ -729,7 +892,7 @@
         }
 
         createForm.reset();
-        alert(`Client created: ${created.id}`);
+        alert(`Cliente creado: ${created.id}`);
       });
     }
 
@@ -753,7 +916,7 @@
     async function refreshLogs() {
       if (!logsEl) return;
       const result = await api("/tools/logs?limit=200");
-      logsEl.textContent = result.lines.join("\n") || "No logs yet.";
+      logsEl.textContent = result.lines.join("\n") || "Aun no hay logs.";
     }
 
     if (refreshLogsBtn) refreshLogsBtn.addEventListener("click", refreshLogs);
@@ -786,7 +949,7 @@
       value === null || ["string", "number", "boolean"].includes(typeof value);
 
     function pathToText(segments) {
-      if (!segments.length) return "(root)";
+      if (!segments.length) return "(raiz)";
       return segments
         .map((seg) => (typeof seg === "number" ? `[${seg}]` : seg))
         .join(".");
@@ -878,7 +1041,7 @@
       fieldCounter = 0;
 
       if (!configDocs.length) {
-        container.innerHTML = '<div class="text-muted">No editable JSON files found.</div>';
+        container.innerHTML = '<div class="text-muted">No se encontraron archivos JSON editables.</div>';
         return;
       }
 
@@ -911,19 +1074,19 @@
         try {
           parsed = JSON.parse(fileResult.content || "{}");
         } catch (err) {
-          setStatus(`Invalid JSON in ${path}: ${err.message}`, true);
+          setStatus(`JSON invalido en ${path}: ${err.message}`, true);
           continue;
         }
         configDocs.push({ path, data: parsed });
       }
 
       renderConfigEditor();
-      setStatus(`Loaded ${configDocs.length} config files and rendered editable fields.`);
+      setStatus(`Se cargaron ${configDocs.length} archivos de configuracion y sus campos editables.`);
     }
 
     if (reloadFilesBtn) {
       reloadFilesBtn.addEventListener("click", () => {
-        loadFilesAndContents().catch((err) => setStatus(`Error loading config files: ${err.message}`, true));
+        loadFilesAndContents().catch((err) => setStatus(`Error al cargar archivos de configuracion: ${err.message}`, true));
       });
     }
 
@@ -931,7 +1094,7 @@
       saveBtn.addEventListener("click", async () => {
         try {
           if (!configDocs.length) {
-            setStatus("No config files loaded to save.", true);
+            setStatus("No hay archivos de configuracion cargados para guardar.", true);
             return;
           }
 
@@ -955,9 +1118,9 @@
 
           configDocs = nextDocs;
           renderConfigEditor();
-          setStatus(`Saved ${configDocs.length} config files successfully.`);
+          setStatus(`Se guardaron correctamente ${configDocs.length} archivos de configuracion.`);
         } catch (err) {
-          setStatus(`Save error: ${err.message}`, true);
+          setStatus(`Error al guardar: ${err.message}`, true);
         }
       });
     }
@@ -965,10 +1128,10 @@
     try {
       await loadFilesAndContents();
       if (!configDocs.length) {
-        setStatus("No editable JSON files found in config/ or static/config/.", true);
+        setStatus("No se encontraron JSON editables en config/ o static/config/.", true);
       }
     } catch (err) {
-      setStatus(`Error loading configuration editor: ${err.message}`, true);
+      setStatus(`Error al cargar el editor de configuracion: ${err.message}`, true);
     }
   }
 
@@ -1016,6 +1179,6 @@
 
   bootstrap().catch((err) => {
     console.error(err);
-    alert(`UI error: ${err.message}`);
+    alert(`Error de interfaz: ${err.message}`);
   });
 })();

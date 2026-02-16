@@ -36,7 +36,7 @@ async def dashboard(request: Request) -> HTMLResponse:
     return templates.TemplateResponse(
         request=request,
         name="dashboard/index.html",
-        context=_base_context(page_title="Dashboard Overview", active_nav="dashboard"),
+        context=_base_context(page_title="Resumen del panel", active_nav="dashboard"),
     )
 
 
@@ -45,7 +45,7 @@ async def clients(request: Request) -> HTMLResponse:
     return templates.TemplateResponse(
         request=request,
         name="clients/index.html",
-        context=_base_context(page_title="Clients", active_nav="clients"),
+        context=_base_context(page_title="Clientes", active_nav="clients"),
     )
 
 
@@ -54,7 +54,7 @@ async def alerts(request: Request) -> HTMLResponse:
     return templates.TemplateResponse(
         request=request,
         name="alerts/index.html",
-        context=_base_context(page_title="Alerts", active_nav="alerts"),
+        context=_base_context(page_title="Alertas", active_nav="alerts"),
     )
 
 
@@ -63,7 +63,7 @@ async def documents(request: Request) -> HTMLResponse:
     return templates.TemplateResponse(
         request=request,
         name="documents/index.html",
-        context=_base_context(page_title="Documents", active_nav="documents"),
+        context=_base_context(page_title="Documentos", active_nav="documents"),
     )
 
 
@@ -72,7 +72,7 @@ async def tools(request: Request) -> HTMLResponse:
     return templates.TemplateResponse(
         request=request,
         name="tools/index.html",
-        context=_base_context(page_title="Tools & Actions", active_nav="tools"),
+        context=_base_context(page_title="Herramientas y acciones", active_nav="tools"),
     )
 
 
@@ -81,5 +81,5 @@ async def settings_page(request: Request) -> HTMLResponse:
     return templates.TemplateResponse(
         request=request,
         name="settings/index.html",
-        context=_base_context(page_title="Settings", active_nav="settings"),
+        context=_base_context(page_title="Configuracion", active_nav="settings"),
     )

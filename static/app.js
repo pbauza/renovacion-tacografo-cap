@@ -285,7 +285,7 @@ function bindDropzones() {
     setDropzoneImagePreview("editPhotoDropzone", file);
     const clientId = Number(document.getElementById("clientEditForm").querySelector("[name=id]").value);
     if (!clientId) {
-      log("Indica Client ID en editar cliente");
+      log("Indica ID de cliente en editar cliente");
       return;
     }
     try {
@@ -322,7 +322,7 @@ function bindDropzones() {
     }
     const documentId = Number(document.getElementById("documentEditForm").querySelector("[name=id]").value);
     if (!documentId) {
-      log("Indica Document ID en editar documento");
+      log("Indica ID de documento en editar documento");
       return;
     }
     try {

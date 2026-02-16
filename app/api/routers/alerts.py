@@ -18,12 +18,12 @@ router = APIRouter(prefix="/alerts", tags=["alerts"])
 async def create_alert(payload: AlertCreate, session: AsyncSession = Depends(get_db_session)) -> Alert:
     client = await session.get(Client, payload.client_id)
     if client is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Client not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Cliente no encontrado.")
 
     if payload.document_id is not None:
         document = await session.get(Document, payload.document_id)
         if document is None:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Documento no encontrado.")
 
     alert = Alert(**payload.model_dump())
     session.add(alert)
@@ -66,7 +66,7 @@ async def list_alerts(
 async def get_alert(alert_id: int, session: AsyncSession = Depends(get_db_session)) -> Alert:
     alert = await session.get(Alert, alert_id)
     if alert is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Alert not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Alerta no encontrada.")
     return alert
 
 
@@ -78,17 +78,17 @@ async def update_alert(
 ) -> Alert:
     alert = await session.get(Alert, alert_id)
     if alert is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Alert not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Alerta no encontrada.")
 
     updates = payload.model_dump(exclude_unset=True)
     if "client_id" in updates:
         client = await session.get(Client, updates["client_id"])
         if client is None:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Client not found")
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Cliente no encontrado.")
     if "document_id" in updates and updates["document_id"] is not None:
         document = await session.get(Document, updates["document_id"])
         if document is None:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Documento no encontrado.")
 
     for field, value in updates.items():
         setattr(alert, field, value)
@@ -103,7 +103,7 @@ async def update_alert(
 async def delete_alert(alert_id: int, session: AsyncSession = Depends(get_db_session)) -> Response:
     alert = await session.get(Alert, alert_id)
     if alert is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Alert not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Alerta no encontrada.")
 
     await session.delete(alert)
     await session.commit()

@@ -1,15 +1,15 @@
 {% extends "base.html" %}
 
-{% block title %}Alerts - {{ app_name }}{% endblock %}
+{% block title %}Alertas - {{ app_name }}{% endblock %}
 
 {% block content %}
 <section class="card mb-3">
   <div class="card-body">
     <form id="alertsFilterForm" class="d-flex flex-wrap gap-2">
-      <select class="form-select w-auto" name="window_days"><option value="">Window: All</option><option value="30">30 days</option><option value="60">60 days</option><option value="90">90 days</option></select>
-      <select class="form-select w-auto" name="urgent_only"><option value="false">Urgency: All</option><option value="true">Urgent only</option></select>
-      <select class="form-select w-auto" name="missing_documents"><option value="false">Docs: All</option><option value="true">Missing documents</option></select>
-      <button class="btn btn-primary" type="submit">Apply Filters</button>
+      <select class="form-select w-auto" name="window_days"><option value="">Ventana: todas</option><option value="30">30 dias</option><option value="60">60 dias</option><option value="90">90 dias</option></select>
+      <select class="form-select w-auto" name="urgent_only"><option value="false">Urgencia: todas</option><option value="true">Solo urgentes</option></select>
+      <select class="form-select w-auto" name="missing_documents"><option value="false">Documentos: todos</option><option value="true">Documentos pendientes</option></select>
+      <button class="btn btn-primary" type="submit">Aplicar filtros</button>
     </form>
   </div>
 </section>
@@ -18,12 +18,12 @@
   <div class="col-xl-8">
     <div class="card">
       <div class="card-header d-flex justify-content-between align-items-center">
-        <h5 class="mb-0">Alerts Management</h5>
-        <button class="btn btn-sm btn-outline-secondary" id="refreshAlertsBtn" type="button">Refresh</button>
+        <h5 class="mb-0">Gestion de alertas</h5>
+        <button class="btn btn-sm btn-outline-secondary" id="refreshAlertsBtn" type="button">Actualizar</button>
       </div>
       <div class="table-responsive">
         <table class="table table-hover mb-0">
-          <thead><tr><th>ID</th><th>Client</th><th>Type</th><th>Expiration Date</th><th>Alert Date</th><th>Action</th></tr></thead>
+          <thead><tr><th>ID</th><th>Cliente</th><th>Tipo</th><th>Fecha de caducidad</th><th>Fecha de alerta</th><th>Accion</th></tr></thead>
           <tbody id="alertsTableBody"></tbody>
         </table>
       </div>
@@ -31,11 +31,11 @@
   </div>
   <div class="col-xl-4">
     <div class="card h-100">
-      <div class="card-header"><h5 class="mb-0">Create Alert</h5></div>
+      <div class="card-header"><h5 class="mb-0">Crear alerta</h5></div>
       <div class="card-body">
         <form id="alertCreateForm" class="row g-2">
           <div id="alertCreateFields" class="row g-2"></div>
-          <div class="col-12"><button class="btn btn-primary">Create Alert</button></div>
+          <div class="col-12"><button class="btn btn-primary">Crear alerta</button></div>
         </form>
       </div>
     </div>

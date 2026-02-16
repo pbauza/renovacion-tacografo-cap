@@ -1,24 +1,24 @@
 {% extends "base.html" %}
 
-{% block title %}Dashboard - {{ app_name }}{% endblock %}
+{% block title %}Panel - {{ app_name }}{% endblock %}
 
 {% block content %}
 <section class="row g-3 mb-3">
-  <div class="col-sm-6 col-xl-3"><div class="card card-kpi"><div class="card-body"><small>Renewals 30 Days</small><h3 id="kpi30">--</h3><span class="kpi-badge badge bg-warning-subtle text-warning-emphasis">Soon</span></div></div></div>
-  <div class="col-sm-6 col-xl-3"><div class="card card-kpi"><div class="card-body"><small>Renewals 60 Days</small><h3 id="kpi60">--</h3><span class="kpi-badge badge bg-info-subtle text-info-emphasis">Planned</span></div></div></div>
-  <div class="col-sm-6 col-xl-3"><div class="card card-kpi"><div class="card-body"><small>Renewals 90 Days</small><h3 id="kpi90">--</h3><span class="kpi-badge badge bg-success-subtle text-success-emphasis">Healthy</span></div></div></div>
-  <div class="col-sm-6 col-xl-3"><div class="card card-kpi"><div class="card-body"><small>Missing Documentation</small><h3 id="kpiMissing">--</h3><span class="kpi-badge badge bg-danger-subtle text-danger-emphasis">Urgent</span></div></div></div>
-  <div class="col-sm-6 col-xl-3"><div class="card card-kpi"><div class="card-body"><small>Expired Documents</small><h3 id="kpiExpired">--</h3><span class="kpi-badge badge bg-danger text-white">Expired</span></div></div></div>
+  <div class="col-sm-6 col-xl-3"><div class="card card-kpi"><div class="card-body"><small>Renovaciones a 30 dias</small><h3 id="kpi30">--</h3><span class="kpi-badge badge bg-warning-subtle text-warning-emphasis">Proximo</span></div></div></div>
+  <div class="col-sm-6 col-xl-3"><div class="card card-kpi"><div class="card-body"><small>Renovaciones a 60 dias</small><h3 id="kpi60">--</h3><span class="kpi-badge badge bg-info-subtle text-info-emphasis">Planificado</span></div></div></div>
+  <div class="col-sm-6 col-xl-3"><div class="card card-kpi"><div class="card-body"><small>Renovaciones a 90 dias</small><h3 id="kpi90">--</h3><span class="kpi-badge badge bg-success-subtle text-success-emphasis">Correcto</span></div></div></div>
+  <div class="col-sm-6 col-xl-3"><div class="card card-kpi"><div class="card-body"><small>Documentacion pendiente</small><h3 id="kpiMissing">--</h3><span class="kpi-badge badge bg-danger-subtle text-danger-emphasis">Urgente</span></div></div></div>
+  <div class="col-sm-6 col-xl-3"><div class="card card-kpi"><div class="card-body"><small>Documentos caducados</small><h3 id="kpiExpired">--</h3><span class="kpi-badge badge bg-danger text-white">Caducado</span></div></div></div>
 </section>
 
 <section class="card mb-3">
   <div class="card-header d-flex justify-content-between align-items-center">
-    <h5 class="mb-0">Latest Alerts</h5>
-    <a href="/alerts" class="btn btn-sm btn-outline-secondary">Open Alerts</a>
+    <h5 class="mb-0">Ultimas alertas</h5>
+    <a href="/alerts" class="btn btn-sm btn-outline-secondary">Abrir alertas</a>
   </div>
   <div class="table-responsive">
     <table class="table table-hover mb-0">
-      <thead><tr><th>Client</th><th>Type</th><th>Expiration Date</th><th>Alert Date</th></tr></thead>
+      <thead><tr><th>Cliente</th><th>Tipo</th><th>Fecha de caducidad</th><th>Fecha de alerta</th></tr></thead>
       <tbody id="dashboardAlertsBody"></tbody>
     </table>
   </div>
@@ -27,10 +27,10 @@
 <section class="row g-3 mb-3">
   <div class="col-xl-6">
     <div class="card h-100">
-      <div class="card-header"><h5 class="mb-0">Recent Clients</h5></div>
+      <div class="card-header"><h5 class="mb-0">Clientes recientes</h5></div>
       <div class="table-responsive">
         <table class="table table-hover mb-0">
-          <thead><tr><th>ID</th><th>Name</th><th>NIF</th><th>Company</th></tr></thead>
+          <thead><tr><th>ID</th><th>Nombre</th><th>NIF</th><th>Empresa</th></tr></thead>
           <tbody id="dashboardClientsBody"></tbody>
         </table>
       </div>
@@ -38,10 +38,10 @@
   </div>
   <div class="col-xl-6">
     <div class="card h-100">
-      <div class="card-header"><h5 class="mb-0">Recent Documents</h5></div>
+      <div class="card-header"><h5 class="mb-0">Documentos recientes</h5></div>
       <div class="table-responsive">
         <table class="table table-hover mb-0">
-          <thead><tr><th>ID</th><th>Client</th><th>Type</th><th>Expiration</th></tr></thead>
+          <thead><tr><th>ID</th><th>Cliente</th><th>Tipo</th><th>Caducidad</th></tr></thead>
           <tbody id="dashboardDocumentsBody"></tbody>
         </table>
       </div>
@@ -50,13 +50,13 @@
 </section>
 
 <section class="card">
-  <div class="card-header"><h5 class="mb-0">Quick Actions</h5></div>
+  <div class="card-header"><h5 class="mb-0">Acciones rapidas</h5></div>
   <div class="card-body d-flex flex-wrap align-items-center gap-3">
-    <img src="{{ dashboard_logo_path }}" alt="Company logo" class="dashboard-logo" />
+    <img src="{{ dashboard_logo_path }}" alt="Logo de la empresa" class="dashboard-logo" />
     <div class="d-flex flex-wrap gap-2">
-      <a class="btn btn-primary" href="/tools#create-client">Create Client</a>
-      <a class="btn btn-outline-primary" href="/tools#import-excel">Import Excel</a>
-      <a class="btn btn-outline-secondary" href="/tools#generate-report">Generate Report</a>
+      <a class="btn btn-primary" href="/tools#create-client">Crear cliente</a>
+      <a class="btn btn-outline-primary" href="/tools#import-excel">Importar Excel</a>
+      <a class="btn btn-outline-secondary" href="/tools#generate-report">Generar informe</a>
     </div>
   </div>
 </section>

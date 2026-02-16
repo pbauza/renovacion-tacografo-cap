@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.deps import get_db_session
 from app.models.alert import Alert
 from app.models.client import Client
+from app.models.document import Document, DocumentType
 from app.schemas.client import ClientCreate, ClientRead, ClientUpdate
 from app.services.audit_log_service import log_event
 from app.services.storage_service import save_client_photo
@@ -22,7 +23,7 @@ async def create_client(
 ) -> Client:
     existing = await session.scalar(select(Client).where(Client.nif == payload.nif))
     if existing:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Client with this NIF already exists")
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Ya existe un cliente con este NIF.")
 
     client = Client(**payload.model_dump())
     session.add(client)
@@ -39,6 +40,7 @@ async def list_clients(
     nif: str | None = Query(default=None),
     company: str | None = Query(default=None),
     phone: str | None = Query(default=None),
+    course_number: str | None = Query(default=None),
     status_color: str | None = Query(default=None, description="green|yellow|red"),
     session: AsyncSession = Depends(get_db_session),
 ) -> list[Client]:
@@ -52,6 +54,14 @@ async def list_clients(
                 Client.nif.ilike(like),
                 Client.company.ilike(like),
                 Client.phone.ilike(like),
+                exists(
+                    select(Document.id).where(
+                        Document.client_id == Client.id,
+                        Document.doc_type == DocumentType.CAP,
+                        Document.course_number.is_not(None),
+                        Document.course_number.ilike(like),
+                    )
+                ),
             )
         )
 
@@ -63,6 +73,17 @@ async def list_clients(
         query = query.where(Client.company.ilike(f"%{company}%"))
     if phone:
         query = query.where(Client.phone.ilike(f"%{phone}%"))
+    if course_number:
+        query = query.where(
+            exists(
+                select(Document.id).where(
+                    Document.client_id == Client.id,
+                    Document.doc_type == DocumentType.CAP,
+                    Document.course_number.is_not(None),
+                    Document.course_number.ilike(f"%{course_number}%"),
+                )
+            )
+        )
 
     today = date.today()
     if status_color == "red":
@@ -83,7 +104,7 @@ async def list_clients(
 async def get_client(client_id: int, session: AsyncSession = Depends(get_db_session)) -> Client:
     client = await session.get(Client, client_id)
     if client is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Client not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Cliente no encontrado.")
     return client
 
 
@@ -95,13 +116,13 @@ async def update_client(
 ) -> Client:
     client = await session.get(Client, client_id)
     if client is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Client not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Cliente no encontrado.")
 
     updates = payload.model_dump(exclude_unset=True)
     if "nif" in updates:
         existing = await session.scalar(select(Client).where(Client.nif == updates["nif"], Client.id != client_id))
         if existing:
-            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Client with this NIF already exists")
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Ya existe un cliente con este NIF.")
 
     for field, value in updates.items():
         setattr(client, field, value)
@@ -120,17 +141,17 @@ async def upload_client_photo(
 ) -> Client:
     client = await session.get(Client, client_id)
     if client is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Client not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Cliente no encontrado.")
 
     if not photo.filename:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Empty file")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Archivo vacio.")
     content_type = (photo.content_type or "").lower()
     ext = Path(photo.filename).suffix.lower()
     allowed_image_exts = {".jpg", ".jpeg", ".png", ".webp", ".bmp", ".gif", ".tif", ".tiff"}
     is_image = content_type.startswith("image/") or ext in allowed_image_exts
     is_pdf = content_type == "application/pdf" or ext == ".pdf"
     if not (is_image or is_pdf):
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Only image or PDF files are allowed")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Solo se permiten archivos de imagen o PDF.")
 
     stored_path = save_client_photo(client.nif, photo)
     client.photo_path = stored_path
@@ -145,7 +166,7 @@ async def upload_client_photo(
 async def delete_client(client_id: int, session: AsyncSession = Depends(get_db_session)) -> Response:
     client = await session.get(Client, client_id)
     if client is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Client not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Cliente no encontrado.")
 
     await session.delete(client)
     await session.commit()
