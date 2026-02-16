@@ -117,6 +117,17 @@ pip install -r requirements.txt
 copy .env.example .env
 ```
 
+### 5.3 Build `.exe` para Windows (Makefile)
+Con GNU Make disponible en Windows:
+
+```powershell
+make build-windows-exe
+```
+
+Salida esperada:
+- Ejecutable: `dist\renovaciones_tacografo_cap\renovaciones_tacografo_cap.exe`
+- Incluye carpetas: `templates`, `static`, `config`
+
 ## 6. Ejecución en desarrollo
 
 ```bash
