@@ -1,0 +1,51 @@
+full_name,nif,phone,company,email,document_type,expiry_date,issue_date,birth_date,address,course_number,flag_fran,flag_ciusaba,expiry_fran,expiry_ciusaba
+Cliente Test 01,10000001B,610000001,Empresa Demo 01,cliente01@example.com,dni,2026-04-01,,1981-02-02,"Calle DNI 1, Valencia",,False,False,,
+Cliente Test 02,10000002C,610000002,Empresa Demo 02,cliente02@example.com,driving_license,2026-05-02,2016-02-18,,"Avenida Carnet 2, Alicante",,False,False,,
+Cliente Test 03,10000003D,610000003,,cliente03@example.com,cap,2026-06-02,,,,CAP-2026-003,False,False,,
+Cliente Test 04,10000004E,610000004,Empresa Demo 04,,tachograph_card,2026-04-19,,,,,False,False,,
+Cliente Test 05,10000005F,610000005,Empresa Demo 05,cliente05@example.com,power_of_attorney,,,,,,False,True,,2026-08-03
+Cliente Test 06,10000006G,610000006,,cliente06@example.com,other,2026-05-21,2025-04-23,,,,False,False,,
+Cliente Test 07,10000007H,610000007,Empresa Demo 07,cliente07@example.com,dni,2026-04-07,,1987-08-08,"Calle DNI 7, Valencia",,False,False,,
+Cliente Test 08,10000008I,610000008,Empresa Demo 08,,driving_license,2026-05-08,2016-01-07,,"Avenida Carnet 8, Alicante",,False,False,,
+Cliente Test 09,10000009J,610000009,,cliente09@example.com,cap,2026-06-08,,,,CAP-2026-009,False,False,,
+Cliente Test 10,10000010K,610000010,Empresa Demo 10,cliente10@example.com,tachograph_card,2026-04-25,,,,,False,False,,
+Cliente Test 11,10000011L,610000011,Empresa Demo 11,cliente11@example.com,power_of_attorney,,,,,,False,True,,2026-08-09
+Cliente Test 12,10000012M,610000012,,,other,2026-05-27,2025-04-11,,,,False,False,,
+Cliente Test 13,10000013N,610000013,Empresa Demo 01,cliente13@example.com,dni,2026-04-13,,1993-02-14,"Calle DNI 13, Valencia",,False,False,,
+Cliente Test 14,10000014O,610000014,Empresa Demo 02,cliente14@example.com,driving_license,2026-05-14,2015-11-26,,"Avenida Carnet 14, Alicante",,False,False,,
+Cliente Test 15,10000015P,610000015,,cliente15@example.com,cap,2026-06-14,,,,CAP-2026-015,False,False,,
+Cliente Test 16,10000016Q,610000016,Empresa Demo 04,,tachograph_card,2026-05-01,,,,,False,False,,
+Cliente Test 17,10000017R,610000017,Empresa Demo 05,cliente17@example.com,power_of_attorney,,,,,,False,True,,2026-08-15
+Cliente Test 18,10000018S,610000018,,cliente18@example.com,other,2026-06-02,2025-03-30,,,,False,False,,
+Cliente Test 19,10000019T,610000019,Empresa Demo 07,cliente19@example.com,dni,2026-04-19,,1999-08-20,"Calle DNI 19, Valencia",,False,False,,
+Cliente Test 20,10000020U,610000020,Empresa Demo 08,,driving_license,2026-05-20,2015-10-15,,"Avenida Carnet 20, Alicante",,False,False,,
+Cliente Test 21,10000021V,610000021,,cliente21@example.com,cap,2026-06-20,,,,CAP-2026-021,False,False,,
+Cliente Test 22,10000022W,610000022,Empresa Demo 10,cliente22@example.com,tachograph_card,2026-05-07,,,,,False,False,,
+Cliente Test 23,10000023X,610000023,Empresa Demo 11,cliente23@example.com,power_of_attorney,,,,,,False,True,,2026-08-21
+Cliente Test 24,10000024Y,610000024,,,other,2026-06-08,2025-03-18,,,,False,False,,
+Cliente Test 25,10000025Z,610000025,Empresa Demo 01,cliente25@example.com,dni,2026-04-25,,1985-02-26,"Calle DNI 25, Valencia",,False,False,,
+Cliente Test 26,10000026A,610000026,Empresa Demo 02,cliente26@example.com,driving_license,2026-05-26,2015-09-03,,"Avenida Carnet 26, Alicante",,False,False,,
+Cliente Test 27,10000027B,610000027,,cliente27@example.com,cap,2026-06-26,,,,CAP-2026-027,False,False,,
+Cliente Test 28,10000028C,610000028,Empresa Demo 04,,tachograph_card,2026-05-13,,,,,False,False,,
+Cliente Test 29,10000029D,610000029,Empresa Demo 05,cliente29@example.com,power_of_attorney,,,,,,False,True,,2026-08-27
+Cliente Test 30,10000030E,610000030,,cliente30@example.com,other,2026-06-14,2025-03-06,,,,False,False,,
+Cliente Test 31,10000031F,610000031,Empresa Demo 07,cliente31@example.com,dni,2026-05-01,,1991-08-05,"Calle DNI 31, Valencia",,False,False,,
+Cliente Test 32,10000032G,610000032,Empresa Demo 08,,driving_license,2026-06-01,2015-07-23,,"Avenida Carnet 32, Alicante",,False,False,,
+Cliente Test 33,10000033H,610000033,,cliente33@example.com,cap,2026-07-02,,,,CAP-2026-033,False,False,,
+Cliente Test 34,10000034I,610000034,Empresa Demo 10,cliente34@example.com,tachograph_card,2026-05-19,,,,,False,False,,
+Cliente Test 35,10000035J,610000035,Empresa Demo 11,cliente35@example.com,power_of_attorney,,,,,,False,True,,2026-09-02
+Cliente Test 36,10000036K,610000036,,,other,2026-06-20,2025-02-22,,,,False,False,,
+Cliente Test 37,10000037L,610000037,Empresa Demo 01,cliente37@example.com,dni,2026-05-07,,1997-02-11,"Calle DNI 37, Valencia",,False,False,,
+Cliente Test 38,10000038M,610000038,Empresa Demo 02,cliente38@example.com,driving_license,2026-06-07,2015-06-11,,"Avenida Carnet 38, Alicante",,False,False,,
+Cliente Test 39,10000039N,610000039,,cliente39@example.com,cap,2026-07-08,,,,CAP-2026-039,False,False,,
+Cliente Test 40,10000040O,610000040,Empresa Demo 04,,tachograph_card,2026-05-25,,,,,False,False,,
+Cliente Test 41,10000041P,610000041,Empresa Demo 05,cliente41@example.com,power_of_attorney,,,,,,False,True,,2026-09-08
+Cliente Test 42,10000042Q,610000042,,cliente42@example.com,other,2026-06-26,2025-02-10,,,,False,False,,
+Cliente Test 43,10000043R,610000043,Empresa Demo 07,cliente43@example.com,dni,2026-05-13,,1983-08-17,"Calle DNI 43, Valencia",,False,False,,
+Cliente Test 44,10000044S,610000044,Empresa Demo 08,,driving_license,2026-06-13,2015-04-30,,"Avenida Carnet 44, Alicante",,False,False,,
+Cliente Test 45,10000045T,610000045,,cliente45@example.com,cap,2026-07-14,,,,CAP-2026-045,False,False,,
+Cliente Test 46,10000046U,610000046,Empresa Demo 10,cliente46@example.com,tachograph_card,2026-05-31,,,,,False,False,,
+Cliente Test 47,10000047V,610000047,Empresa Demo 11,cliente47@example.com,power_of_attorney,,,,,,False,True,,2026-09-14
+Cliente Test 48,10000048W,610000048,,,other,2026-07-02,2025-01-29,,,,False,False,,
+Cliente Test 49,10000049X,610000049,Empresa Demo 01,cliente49@example.com,dni,2026-05-19,,1989-02-23,"Calle DNI 49, Valencia",,False,False,,
+Cliente Test 50,10000050Y,610000050,Empresa Demo 02,cliente50@example.com,driving_license,2026-06-19,2015-03-19,,"Avenida Carnet 50, Alicante",,False,False,,

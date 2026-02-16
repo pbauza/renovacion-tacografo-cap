@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}{{ app_name }}{% endblock %}</title>
+  <link rel="icon" type="image/png" href="{{ favicon_path }}" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/admin.css" />
+  {% block head_extra %}{% endblock %}
+</head>
+<body data-api-prefix="{{ api_prefix }}" data-page="{{ active_nav }}">
+  <div class="dashboard-shell">
+    {% include "components/sidebar.html" %}
+
+    <div class="main-shell">
+      {% include "components/header.html" %}
+
+      <main class="content-shell">
+        {% block content %}{% endblock %}
+      </main>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/static/admin.js"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

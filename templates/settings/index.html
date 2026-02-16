@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}Configuracion - {{ app_name }}{% endblock %}
+
+{% block content %}
+<section class="card mb-3">
+  <div class="card-header"><h5 class="mb-0">Editor de configuracion</h5></div>
+  <div class="card-body">
+    <div class="d-flex flex-wrap gap-2">
+      <button id="settingsReloadFilesBtn" type="button" class="btn btn-outline-secondary">Recargar campos</button>
+      <button id="settingsSaveBtn" type="button" class="btn btn-primary">Guardar cambios</button>
+    </div>
+    <div class="mt-2 small text-muted">
+      Rutas editables: <code>config/</code> y <code>static/config/</code>. Los cambios en <code>config/app_config.json</code> pueden requerir reiniciar la aplicacion.
+    </div>
+    <div id="settingsConfigEditorContainer" class="mt-3 d-grid gap-3"></div>
+    <pre id="settingsStatus" class="logs-preview mt-3 mb-0">Listo.</pre>
+  </div>
+</section>
+{% endblock %}

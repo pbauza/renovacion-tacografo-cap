@@ -1,0 +1,29 @@
+{
+  "entity": "alert",
+  "fields": [
+    {
+      "name": "client_id",
+      "label": "ID de cliente",
+      "type": "number",
+      "required": true
+    },
+    {
+      "name": "document_id",
+      "label": "ID de documento",
+      "type": "number",
+      "required": false
+    },
+    {
+      "name": "expiry_date",
+      "label": "Fecha de caducidad",
+      "type": "date",
+      "required": true
+    },
+    {
+      "name": "alert_date",
+      "label": "Fecha de alerta",
+      "type": "date",
+      "required": true
+    }
+  ]
+}

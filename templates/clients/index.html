@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Clientes - {{ app_name }}{% endblock %}
+
+{% block content %}
+<section class="card mb-3">
+  <div class="card-body">
+    <form id="clientsSearchForm" class="d-flex flex-wrap gap-2">
+      <input class="form-control flex-fill min-w-220" name="q" placeholder="Buscar por nombre, NIF, telefono, empresa o curso CAP" />
+      <select class="form-select w-auto" name="status_color">
+        <option value="">Estado: todos</option>
+        <option value="green">Verde</option>
+        <option value="yellow">Amarillo</option>
+        <option value="red">Rojo</option>
+      </select>
+      <button class="btn btn-primary" type="submit">Buscar</button>
+    </form>
+  </div>
+</section>
+
+<section class="row g-3">
+  <div class="col-xl-8">
+    <div class="card h-100">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Todos los clientes</h5>
+        <button class="btn btn-sm btn-outline-secondary" id="refreshClientsBtn" type="button">Actualizar</button>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead><tr><th>ID</th><th>Nombre</th><th>NIF</th><th>Empresa</th><th>Telefono</th><th>Email</th></tr></thead>
+          <tbody id="clientsTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xl-4">
+    <div class="card mb-3">
+      <div class="card-header"><h6 class="mb-0">Detalle del cliente</h6></div>
+      <div class="card-body">
+        <input type="hidden" id="selectedClientId" />
+        <p class="mb-1"><strong>Nombre:</strong> <span id="detailFullName">--</span></p>
+        <p class="mb-1"><strong>NIF:</strong> <span id="detailNif">--</span></p>
+        <p class="mb-1"><strong>Empresa:</strong> <span id="detailCompany">--</span></p>
+        <p class="mb-3"><strong>Telefono:</strong> <span id="detailPhone">--</span></p>
+
+        <div class="drop-zone-lite mb-2" id="clientPhotoDropzone">Arrastra aqui la foto del cliente (imagen o PDF) para reemplazarla</div>
+        <img id="clientPhotoPreview" class="img-fluid rounded border d-none" alt="Vista previa del cliente" />
+
+        <hr />
+        <h6>Editar cliente</h6>
+        <form id="clientEditForm" class="d-grid gap-2">
+          <input class="form-control" name="full_name" placeholder="Nombre completo" />
+          <input class="form-control" name="company" placeholder="Empresa" />
+          <input class="form-control" name="nif" placeholder="NIF" />
+          <input class="form-control" name="phone" placeholder="Telefono" />
+          <input class="form-control" name="email" placeholder="Email" />
+          <div class="d-flex gap-2">
+            <button class="btn btn-primary w-100" type="submit">Guardar</button>
+            <button class="btn btn-outline-danger" id="deleteClientBtn" type="button">Eliminar</button>
+          </div>
+        </form>
+      </div>
+      <div class="card-footer">
+        <button class="btn btn-outline-secondary w-100" id="generateClientPdfBtn" type="button">Generar PDF</button>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

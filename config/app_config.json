@@ -1,0 +1,15 @@
+{
+  "app_name": "Gestión CIUSABA",
+  "workspace_subtitle": "Espacio de gestion de Tacografo y CAP",
+  "ui": {
+    "logo_path": "/static/img/logo.png",
+    "favicon_path": "/static/img/logo.png",
+    "dashboard_logo_path": "/static/img/logo.png"
+  },
+  "pdf": {
+    "report_title": "Informe de Cliente",
+    "organization_name": "CIUSABA",
+    "contact_email": "contact@renovaciones.local",
+    "contact_phone": "+34 000 000 000"
+  }
+}

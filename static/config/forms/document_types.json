@@ -1,0 +1,237 @@
+{
+  "entity": "document",
+  "types": {
+    "dni": {
+      "label": "DNI",
+      "fields": [
+        {
+          "name": "expiry_date",
+          "label": "Fecha de caducidad (DNI)",
+          "type": "date",
+          "required": true
+        },
+        {
+          "name": "birth_date",
+          "label": "Fecha de nacimiento",
+          "type": "date",
+          "required": true
+        },
+        {
+          "name": "address",
+          "label": "Direccion",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    "driving_license": {
+      "label": "CARNET DE CONDUCIR",
+      "fields": [
+        {
+          "name": "expiry_date",
+          "label": "Fecha de caducidad (permisos C o D)",
+          "type": "date",
+          "required": true
+        },
+        {
+          "name": "issue_date",
+          "label": "Fecha de obtencion",
+          "type": "date",
+          "required": true
+        },
+        {
+          "name": "address",
+          "label": "Direccion",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    "cap": {
+      "label": "CAP",
+      "fields": [
+        {
+          "name": "expiry_date",
+          "label": "Fecha de caducidad",
+          "type": "date",
+          "required": true
+        },
+        {
+          "name": "course_number",
+          "label": "Numero de curso (opcional)",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "renewed_with_us",
+          "label": "Renovado con nosotros",
+          "type": "checkbox",
+          "required": false
+        },
+        {
+          "name": "payment_method",
+          "label": "Forma de pago",
+          "type": "select",
+          "required": false,
+          "placeholder": "Selecciona forma de pago",
+          "options": [
+            {
+              "value": "efectivo",
+              "label": "Efectivo"
+            },
+            {
+              "value": "visa",
+              "label": "VISA"
+            },
+            {
+              "value": "empresa",
+              "label": "Empresa"
+            }
+          ]
+        },
+        {
+          "name": "fundae",
+          "label": "FUNDAE",
+          "type": "checkbox",
+          "required": false
+        },
+        {
+          "name": "fundae_payment_type",
+          "label": "Tipo de cobro empresa (recibo/transferencia)",
+          "type": "select",
+          "required": false,
+          "placeholder": "Selecciona recibo o transferencia",
+          "options": [
+            {
+              "value": "recibo",
+              "label": "RECIBO"
+            },
+            {
+              "value": "transferencia",
+              "label": "TRANSFERENCIA"
+            }
+          ]
+        },
+        {
+          "name": "operation_number",
+          "label": "Numero de operacion (opcional)",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    "tachograph_card": {
+      "label": "TARJETA TACOGRAFO",
+      "fields": [
+        {
+          "name": "expiry_date",
+          "label": "Fecha de caducidad",
+          "type": "date",
+          "required": true
+        },
+        {
+          "name": "renewed_with_us",
+          "label": "Renovado con nosotros",
+          "type": "checkbox",
+          "required": false
+        },
+        {
+          "name": "payment_method",
+          "label": "Forma de pago",
+          "type": "select",
+          "required": false,
+          "placeholder": "Selecciona forma de pago",
+          "options": [
+            {
+              "value": "efectivo",
+              "label": "Efectivo"
+            },
+            {
+              "value": "visa",
+              "label": "VISA"
+            },
+            {
+              "value": "empresa",
+              "label": "Empresa"
+            }
+          ]
+        },
+        {
+          "name": "fundae",
+          "label": "FUNDAE",
+          "type": "checkbox",
+          "required": false
+        },
+        {
+          "name": "fundae_payment_type",
+          "label": "Tipo de cobro empresa (recibo/transferencia)",
+          "type": "select",
+          "required": false,
+          "placeholder": "Selecciona recibo o transferencia",
+          "options": [
+            {
+              "value": "recibo",
+              "label": "RECIBO"
+            },
+            {
+              "value": "transferencia",
+              "label": "TRANSFERENCIA"
+            }
+          ]
+        },
+        {
+          "name": "operation_number",
+          "label": "Numero de operacion (opcional)",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    "power_of_attorney": {
+      "label": "APODERA",
+      "fields": [
+        {
+          "name": "flag_fran",
+          "label": "Apoderamiento Fran",
+          "type": "checkbox",
+          "required": false
+        },
+        {
+          "name": "flag_ciusaba",
+          "label": "Apoderamiento CIUSABA",
+          "type": "checkbox",
+          "required": false
+        },
+        {
+          "name": "expiry_fran",
+          "label": "Fecha de caducidad FRAN",
+          "type": "date",
+          "required": false
+        },
+        {
+          "name": "expiry_ciusaba",
+          "label": "Fecha de caducidad CIUSABA",
+          "type": "date",
+          "required": false
+        }
+      ]
+    },
+    "other": {
+      "label": "OTRO",
+      "fields": [
+        {
+          "name": "expiry_date",
+          "label": "Fecha de caducidad",
+          "type": "date",
+          "required": true
+        },
+        {
+          "name": "issue_date",
+          "label": "Fecha de obtencion (opcional)",
+          "type": "date",
+          "required": false
+        }
+      ]
+    }
+  }
+}
