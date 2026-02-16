@@ -17,6 +17,10 @@ class Settings(BaseSettings):
     scheduler_enabled: bool = True
     reset_db_on_startup: bool = False
     auto_reset_sqlite_on_schema_mismatch: bool = True
+    backup_on_startup: bool = True
+    backup_keep_last: int = 30
+    storage_backup_on_startup: bool = True
+    storage_backup_keep_last: int = 30
 
     model_config = SettingsConfigDict(
         env_file=".env",
