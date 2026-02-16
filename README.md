@@ -69,6 +69,10 @@ DATABASE_URL=sqlite+aiosqlite:///./renovaciones.db
 SCHEDULER_ENABLED=true
 RESET_DB_ON_STARTUP=false
 AUTO_RESET_SQLITE_ON_SCHEMA_MISMATCH=true
+BACKUP_ON_STARTUP=true
+BACKUP_KEEP_LAST=30
+STORAGE_BACKUP_ON_STARTUP=true
+STORAGE_BACKUP_KEEP_LAST=30
 ```
 
 ### 4.2 `config/app_config.json` (branding + PDF + GUI)
@@ -138,6 +142,21 @@ Accesos:
 - GUI: `http://127.0.0.1:8000/`
 - Swagger: `http://127.0.0.1:8000/docs`
 - ReDoc: `http://127.0.0.1:8000/redoc`
+
+### 6.1 Ejecución en Windows con `.bat`
+Script recomendado:
+
+```powershell
+.\run_app.bat
+```
+
+Qué hace:
+- Instala dependencias desde `requirements.txt`.
+- Arranca la app con `python main.py`.
+- Si `DATABASE_URL` no está definida, usa SQLite local de Windows:
+  - `C:\Users\<usuario>\AppData\Local\RenovacionesTacografoCap\renovaciones.db`
+
+Este comportamiento evita bloqueos de SQLite al ejecutar desde rutas UNC/WSL (`\\wsl.localhost\...`).
 
 ## 7. GUI (panel de administración)
 Secciones:
@@ -352,11 +371,70 @@ Importante:
 - Verificar que el navegador no abra el archivo fuera de la dropzone.
 - Confirmar formato permitido según operación (imagen/PDF o PDF de documento).
 
+## 19. Copias de seguridad y restauración
+
+### 19.1 Copia automática al arrancar
+En cada inicio, la app puede crear automáticamente:
+- Backup de base de datos SQLite.
+- Backup comprimido de `storage/`.
+
+Variables de control en `.env`:
+- `BACKUP_ON_STARTUP=true`
+- `BACKUP_KEEP_LAST=30`
+- `STORAGE_BACKUP_ON_STARTUP=true`
+- `STORAGE_BACKUP_KEEP_LAST=30`
+
+Rutas habituales:
+- Backup BD (modo `run_app.bat`): `C:\Users\<usuario>\AppData\Local\RenovacionesTacografoCap\backups\`
+- Backup de `storage/`: `storage/backups/`
+
+### 19.2 Restaurar base de datos (Windows)
+Restaurar el backup más reciente:
+
+```powershell
+.\restore_backup.bat
+```
+
+Restaurar uno concreto:
+
+```powershell
+.\restore_backup.bat renovaciones_YYYYMMDD_HHMMSS.db
+```
+
+### 19.3 Restaurar carpeta `storage/` (Windows)
+Restaurar el backup ZIP más reciente:
+
+```powershell
+.\restore_storage_backup.bat
+```
+
+Restaurar uno concreto:
+
+```powershell
+.\restore_storage_backup.bat storage_YYYYMMDD_HHMMSS.zip
+```
+
+Antes de restaurar, el script genera rollback automáticamente:
+- `storage/backups/storage_before_restore_YYYYMMDD_HHMMSS.zip`
+
+### 19.4 Copia manual rápida (PowerShell)
+Copiar BD local de Windows:
+
+```powershell
+Copy-Item "$env:LOCALAPPDATA\RenovacionesTacografoCap\renovaciones.db" "$env:LOCALAPPDATA\RenovacionesTacografoCap\backups\renovaciones_manual_$(Get-Date -Format yyyyMMdd_HHmmss).db"
+```
+
+Copiar carpeta `storage/` a ZIP:
+
+```powershell
+Compress-Archive -Path ".\storage\*" -DestinationPath ".\storage\backups\storage_manual_$(Get-Date -Format yyyyMMdd_HHmmss).zip" -Force
+```
+
 ---
 
 Si quieres, el siguiente paso puede ser añadir una guía de despliegue productivo completa (Nginx + systemd + PostgreSQL + backup/restore) también en español dentro de este README.
 
-## 19. Licencia y uso
+## 20. Licencia y uso
 Este proyecto es propiedad de **Pedro Jose Bauza Ruiz** (`pjbauza@gmail.com`).
 
 La licencia de este repositorio es **propietaria y de uso prohibido**.  
