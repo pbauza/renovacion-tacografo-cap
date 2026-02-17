@@ -486,10 +486,11 @@
           .map((a) => {
             const client = clientById[a.client_id];
             const doc = a.document_id ? docById[a.document_id] : null;
+            const alertDocType = doc ? doc.doc_type : a.doc_type;
             return `<tr>
               <td>${a.id}</td>
               <td>${client ? client.full_name : a.client_id}</td>
-              <td>${doc ? humanDocType(doc.doc_type) : "--"}</td>
+              <td>${humanDocType(alertDocType)}</td>
               <td>${a.expiry_date}</td>
               <td>${a.alert_date}</td>
               <td><a class="btn btn-sm btn-outline-secondary" href="/clients?client_id=${a.client_id}">Ver cliente</a></td>
@@ -505,7 +506,8 @@
         ? top.map((a) => {
             const client = clientById[a.client_id];
             const doc = a.document_id ? docById[a.document_id] : null;
-            return `<tr><td>${client ? client.full_name : a.client_id}</td><td>${doc ? humanDocType(doc.doc_type) : "--"}</td><td>${a.expiry_date}</td><td>${a.alert_date}</td></tr>`;
+            const alertDocType = doc ? doc.doc_type : a.doc_type;
+            return `<tr><td>${client ? client.full_name : a.client_id}</td><td>${humanDocType(alertDocType)}</td><td>${a.expiry_date}</td><td>${a.alert_date}</td></tr>`;
           }).join("")
         : renderEmptyRow(4, "Aun no hay alertas cargadas.");
     }

@@ -4,6 +4,7 @@ from sqlalchemy import Date, DateTime, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
+from app.models.document import DocumentType
 
 
 class Alert(Base):
@@ -22,3 +23,7 @@ class Alert(Base):
 
     client = relationship("Client", back_populates="alerts")
     document = relationship("Document", back_populates="alerts")
+
+    @property
+    def doc_type(self) -> DocumentType | None:
+        return self.document.doc_type if self.document else None

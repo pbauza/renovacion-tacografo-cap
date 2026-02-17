@@ -257,3 +257,33 @@ async def test_driving_license_permission_flags(client):
     assert payload["doc_type"] == "other"
     assert payload["flag_permiso_c"] is False
     assert payload["flag_permiso_d"] is False
+
+
+@pytest.mark.anyio
+async def test_alerts_include_doc_type(client):
+    response = await client.post(
+        "/api/v1/clients",
+        json={
+            "full_name": "Ana Tipo Alerta",
+            "nif": "77889900G",
+            "phone": "600600600",
+        },
+    )
+    assert response.status_code == 201
+    client_id = response.json()["id"]
+
+    response = await client.post(
+        "/api/v1/documents",
+        json={
+            "client_id": client_id,
+            "doc_type": "cap",
+            "expiry_date": (date.today() + timedelta(days=60)).isoformat(),
+        },
+    )
+    assert response.status_code == 201
+
+    response = await client.get(f"/api/v1/alerts?client_id={client_id}")
+    assert response.status_code == 200
+    alerts = response.json()
+    assert alerts
+    assert alerts[0]["doc_type"] == "cap"
