@@ -212,3 +212,48 @@ async def test_cap_payment_rules(client):
     assert response.json()["payment_method"] == "empresa"
     assert response.json()["fundae"] is True
     assert response.json()["fundae_payment_type"] == "transferencia"
+
+
+@pytest.mark.anyio
+async def test_driving_license_permission_flags(client):
+    response = await client.post(
+        "/api/v1/clients",
+        json={
+            "full_name": "Miguel Torres",
+            "nif": "66778899F",
+            "phone": "600500500",
+        },
+    )
+    assert response.status_code == 201
+    client_id = response.json()["id"]
+
+    response = await client.post(
+        "/api/v1/documents",
+        json={
+            "client_id": client_id,
+            "doc_type": "driving_license",
+            "expiry_date": (date.today() + timedelta(days=200)).isoformat(),
+            "issue_date": (date.today() - timedelta(days=400)).isoformat(),
+            "address": "Calle Mayor 10",
+            "flag_permiso_c": True,
+            "flag_permiso_d": False,
+        },
+    )
+    assert response.status_code == 201
+    payload = response.json()
+    assert payload["flag_permiso_c"] is True
+    assert payload["flag_permiso_d"] is False
+    document_id = payload["id"]
+
+    response = await client.patch(
+        f"/api/v1/documents/{document_id}",
+        json={
+            "doc_type": "other",
+            "expiry_date": (date.today() + timedelta(days=300)).isoformat(),
+        },
+    )
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["doc_type"] == "other"
+    assert payload["flag_permiso_c"] is False
+    assert payload["flag_permiso_d"] is False

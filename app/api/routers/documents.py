@@ -69,6 +69,12 @@ def _normalize_payment_fields(data: dict, doc_type: DocumentType) -> None:
     data["fundae_payment_type"] = fundae_payment_type
 
 
+def _normalize_driving_license_flags(data: dict, doc_type: DocumentType) -> None:
+    if doc_type != DocumentType.DRIVING_LICENSE:
+        data["flag_permiso_c"] = False
+        data["flag_permiso_d"] = False
+
+
 def _validate_payload(data: dict, doc_type: DocumentType) -> None:
     if doc_type == DocumentType.DNI:
         if not data.get("expiry_date") or not data.get("birth_date") or not data.get("address"):
@@ -141,6 +147,8 @@ def _document_payload_dict(document: Document) -> dict:
         "operation_number": document.operation_number,
         "flag_fran": document.flag_fran,
         "flag_ciusaba": document.flag_ciusaba,
+        "flag_permiso_c": document.flag_permiso_c,
+        "flag_permiso_d": document.flag_permiso_d,
         "expiry_fran": document.expiry_fran,
         "expiry_ciusaba": document.expiry_ciusaba,
     }
@@ -188,6 +196,7 @@ async def create_document(payload: DocumentCreate, session: AsyncSession = Depen
 
     data = payload.model_dump()
     _normalize_payment_fields(data, payload.doc_type)
+    _normalize_driving_license_flags(data, payload.doc_type)
     _validate_payload(data, payload.doc_type)
 
     document = Document(**data)
@@ -275,11 +284,14 @@ async def update_document(
 
     data = _document_payload_dict(document)
     _normalize_payment_fields(data, document.doc_type)
+    _normalize_driving_license_flags(data, document.doc_type)
     document.renewed_with_us = data["renewed_with_us"]
     document.payment_method = data["payment_method"]
     document.fundae = data["fundae"]
     document.fundae_payment_type = data["fundae_payment_type"]
     document.operation_number = data["operation_number"]
+    document.flag_permiso_c = data["flag_permiso_c"]
+    document.flag_permiso_d = data["flag_permiso_d"]
     _validate_payload(data, document.doc_type)
     await _upsert_auto_alert(session, document)
 

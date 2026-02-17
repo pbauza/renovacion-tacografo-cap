@@ -60,6 +60,8 @@ class Document(Base):
 
     flag_fran: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     flag_ciusaba: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    flag_permiso_c: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    flag_permiso_d: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     expiry_fran: Mapped[date | None] = mapped_column(Date, nullable=True)
     expiry_ciusaba: Mapped[date | None] = mapped_column(Date, nullable=True)
 

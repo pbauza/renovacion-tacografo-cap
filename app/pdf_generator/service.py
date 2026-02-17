@@ -247,6 +247,8 @@ class PdfGeneratorService:
                 ["Fecha de nacimiento", _fmt_official_date(getattr(doc, "birth_date", None))],
                 ["Direccion", str(getattr(doc, "address", "") or "-")],
                 ["Numero de curso", str(getattr(doc, "course_number", "") or "-")],
+                ["Permiso C", "Si" if bool(getattr(doc, "flag_permiso_c", False)) else "No"],
+                ["Permiso D", "Si" if bool(getattr(doc, "flag_permiso_d", False)) else "No"],
                 ["Apoderamiento Fran", "Si" if bool(getattr(doc, "flag_fran", False)) else "No"],
                 ["Apoderamiento CIUSABA", "Si" if bool(getattr(doc, "flag_ciusaba", False)) else "No"],
                 ["Caducidad FRAN", _fmt_official_date(getattr(doc, "expiry_fran", None))],

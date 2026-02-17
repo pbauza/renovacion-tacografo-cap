@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from fastapi.responses import FileResponse
@@ -47,6 +48,62 @@ def _collect_document_expiry_dates(document: Document) -> list:
     if document.expiry_date:
         expiries.append(document.expiry_date)
     return expiries
+
+
+def _none_if_blank(value: Any) -> Any:
+    if isinstance(value, str):
+        cleaned = value.strip()
+        return cleaned if cleaned else None
+    return value
+
+
+def _matches_nullable(column: Any, value: Any) -> Any:
+    return column.is_(None) if value is None else column == value
+
+
+async def _find_existing_document_for_import(
+    session: AsyncSession,
+    *,
+    client_id: int,
+    doc_type: DocumentType,
+    expiry_date: Any,
+    issue_date: Any,
+    birth_date: Any,
+    address: Any,
+    course_number: Any,
+    renewed_with_us: bool,
+    payment_method: Any,
+    fundae: bool,
+    fundae_payment_type: Any,
+    operation_number: Any,
+    flag_fran: bool,
+    flag_ciusaba: bool,
+    flag_permiso_c: bool,
+    flag_permiso_d: bool,
+    expiry_fran: Any,
+    expiry_ciusaba: Any,
+) -> Document | None:
+    query = select(Document).where(
+        Document.client_id == client_id,
+        Document.doc_type == doc_type,
+        _matches_nullable(Document.expiry_date, expiry_date),
+        _matches_nullable(Document.issue_date, issue_date),
+        _matches_nullable(Document.birth_date, birth_date),
+        _matches_nullable(Document.address, address),
+        _matches_nullable(Document.course_number, course_number),
+        Document.renewed_with_us == renewed_with_us,
+        _matches_nullable(Document.payment_method, payment_method),
+        Document.fundae == fundae,
+        _matches_nullable(Document.fundae_payment_type, fundae_payment_type),
+        _matches_nullable(Document.operation_number, operation_number),
+        Document.flag_fran == flag_fran,
+        Document.flag_ciusaba == flag_ciusaba,
+        Document.flag_permiso_c == flag_permiso_c,
+        Document.flag_permiso_d == flag_permiso_d,
+        _matches_nullable(Document.expiry_fran, expiry_fran),
+        _matches_nullable(Document.expiry_ciusaba, expiry_ciusaba),
+    )
+    return await session.scalar(query.limit(1))
 
 
 def _resolve_config_path(raw_path: str) -> Path:
@@ -143,6 +200,8 @@ async def import_clients(
     clients_created = 0
     clients_updated = 0
     documents_created = 0
+    documents_skipped_existing = 0
+    documents_updated_existing = 0
     errors: list[str] = []
 
     for row in rows:
@@ -151,10 +210,16 @@ async def import_clients(
             nif = str(data.get("nif") or "").strip()
             full_name = str(data.get("full_name") or "").strip()
             phone = str(data.get("phone") or "").strip()
-            company = data.get("company")
-            email = data.get("email")
+            company_raw = data.get("company")
+            company = str(company_raw).strip() if company_raw is not None else None
+            if company == "":
+                company = None
+            email_raw = data.get("email")
+            email = str(email_raw).strip() if email_raw is not None else None
+            if email == "":
+                email = None
 
-            if not nif or not full_name or not phone:
+            if not nif or not full_name:
                 errors.append(f"Fila {row.row_number}: faltan campos obligatorios.")
                 continue
 
@@ -166,9 +231,12 @@ async def import_clients(
                 clients_created += 1
             else:
                 client.full_name = full_name
-                client.phone = phone
-                client.company = company
-                client.email = email
+                if phone:
+                    client.phone = phone
+                if company is not None:
+                    client.company = company
+                if email is not None:
+                    client.email = email
                 clients_updated += 1
 
             doc_type = parse_document_type(data.get("document_type"))
@@ -210,14 +278,19 @@ async def import_clients(
                     fundae_payment_type = None
                     operation_number = None
 
-                if doc_type != DocumentType.POWER_OF_ATTORNEY and not expiry_date:
+                if doc_type not in {DocumentType.POWER_OF_ATTORNEY, DocumentType.DRIVING_LICENSE} and not expiry_date:
                     errors.append(f"Fila {row.row_number}: falta la fecha de caducidad del documento.")
                     continue
 
                 flag_fran = to_bool(data.get("flag_fran"))
                 flag_ciusaba = to_bool(data.get("flag_ciusaba"))
+                flag_permiso_c = to_bool(data.get("flag_permiso_c") or data.get("permiso_c") or data.get("flag_c"))
+                flag_permiso_d = to_bool(data.get("flag_permiso_d") or data.get("permiso_d") or data.get("flag_d"))
                 expiry_fran = to_date(data.get("expiry_fran"))
                 expiry_ciusaba = to_date(data.get("expiry_ciusaba"))
+                if doc_type != DocumentType.DRIVING_LICENSE:
+                    flag_permiso_c = False
+                    flag_permiso_d = False
                 if doc_type == DocumentType.POWER_OF_ATTORNEY:
                     has_valid_expiry = (flag_fran and expiry_fran) or (flag_ciusaba and expiry_ciusaba)
                     if not has_valid_expiry:
@@ -226,14 +299,43 @@ async def import_clients(
                         )
                         continue
 
-                doc = Document(
+                issue_date = to_date(data.get("issue_date"))
+                birth_date = to_date(data.get("birth_date"))
+                address = _none_if_blank(data.get("address"))
+                course_number = _none_if_blank(data.get("course_number"))
+
+                if doc_type == DocumentType.DRIVING_LICENSE:
+                    existing_license = await session.scalar(
+                        select(Document).where(
+                            Document.client_id == client.id,
+                            Document.doc_type == DocumentType.DRIVING_LICENSE,
+                        )
+                    )
+                    if existing_license is not None:
+                        merged_c = bool(existing_license.flag_permiso_c) or flag_permiso_c
+                        merged_d = bool(existing_license.flag_permiso_d) or flag_permiso_d
+                        changed = False
+                        if merged_c != existing_license.flag_permiso_c:
+                            existing_license.flag_permiso_c = merged_c
+                            changed = True
+                        if merged_d != existing_license.flag_permiso_d:
+                            existing_license.flag_permiso_d = merged_d
+                            changed = True
+                        if changed:
+                            documents_updated_existing += 1
+                        else:
+                            documents_skipped_existing += 1
+                        continue
+
+                existing_document = await _find_existing_document_for_import(
+                    session,
                     client_id=client.id,
                     doc_type=doc_type,
                     expiry_date=expiry_date,
-                    issue_date=to_date(data.get("issue_date")),
-                    birth_date=to_date(data.get("birth_date")),
-                    address=data.get("address"),
-                    course_number=data.get("course_number"),
+                    issue_date=issue_date,
+                    birth_date=birth_date,
+                    address=address,
+                    course_number=course_number,
                     renewed_with_us=renewed_with_us,
                     payment_method=payment_method,
                     fundae=fundae,
@@ -241,6 +343,32 @@ async def import_clients(
                     operation_number=operation_number,
                     flag_fran=flag_fran,
                     flag_ciusaba=flag_ciusaba,
+                    flag_permiso_c=flag_permiso_c,
+                    flag_permiso_d=flag_permiso_d,
+                    expiry_fran=expiry_fran,
+                    expiry_ciusaba=expiry_ciusaba,
+                )
+                if existing_document is not None:
+                    documents_skipped_existing += 1
+                    continue
+
+                doc = Document(
+                    client_id=client.id,
+                    doc_type=doc_type,
+                    expiry_date=expiry_date,
+                    issue_date=issue_date,
+                    birth_date=birth_date,
+                    address=address,
+                    course_number=course_number,
+                    renewed_with_us=renewed_with_us,
+                    payment_method=payment_method,
+                    fundae=fundae,
+                    fundae_payment_type=fundae_payment_type,
+                    operation_number=operation_number,
+                    flag_fran=flag_fran,
+                    flag_ciusaba=flag_ciusaba,
+                    flag_permiso_c=flag_permiso_c,
+                    flag_permiso_d=flag_permiso_d,
                     expiry_fran=expiry_fran,
                     expiry_ciusaba=expiry_ciusaba,
                 )
@@ -267,12 +395,21 @@ async def import_clients(
             errors.append(f"Fila {row.row_number}: {exc}")
 
     await session.commit()
-    log_event("import_clients", f"created={clients_created}, updated={clients_updated}, docs={documents_created}, errors={len(errors)}")
+    log_event(
+        "import_clients",
+        (
+            f"created={clients_created}, updated={clients_updated}, docs={documents_created}, "
+            f"docs_skipped_existing={documents_skipped_existing}, docs_updated_existing={documents_updated_existing}, "
+            f"errors={len(errors)}"
+        ),
+    )
 
     return {
         "clients_created": clients_created,
         "clients_updated": clients_updated,
         "documents_created": documents_created,
+        "documents_skipped_existing": documents_skipped_existing,
+        "documents_updated_existing": documents_updated_existing,
         "errors": errors,
     }
 

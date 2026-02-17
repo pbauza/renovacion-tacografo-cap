@@ -903,6 +903,18 @@
         data.append("file", importInput.files[0]);
         const result = await api("/tools/import/clients", { method: "POST", body: data });
         if (importResult) importResult.textContent = JSON.stringify(result, null, 2);
+        const errorsCount = Array.isArray(result?.errors) ? result.errors.length : 0;
+        alert(
+          [
+            "Importacion completada.",
+            `Clientes creados: ${result?.clients_created ?? 0}`,
+            `Clientes actualizados: ${result?.clients_updated ?? 0}`,
+            `Documentos creados: ${result?.documents_created ?? 0}`,
+            `Documentos omitidos por existir: ${result?.documents_skipped_existing ?? 0}`,
+            `Documentos existentes actualizados: ${result?.documents_updated_existing ?? 0}`,
+            `Errores: ${errorsCount}`,
+          ].join("\n")
+        );
       });
     }
 
