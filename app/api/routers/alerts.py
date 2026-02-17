@@ -3,6 +3,7 @@ from datetime import date, timedelta
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.api.deps import get_db_session
 from app.models.alert import Alert
@@ -28,7 +29,7 @@ async def create_alert(payload: AlertCreate, session: AsyncSession = Depends(get
     alert = Alert(**payload.model_dump())
     session.add(alert)
     await session.commit()
-    await session.refresh(alert)
+    await session.refresh(alert, attribute_names=["document"])
     log_event("create_alert", f"alert_id={alert.id}, client_id={alert.client_id}")
     return alert
 
@@ -41,7 +42,7 @@ async def list_alerts(
     client_id: int | None = Query(default=None),
     session: AsyncSession = Depends(get_db_session),
 ) -> list[Alert]:
-    query = select(Alert)
+    query = select(Alert).options(selectinload(Alert.document))
 
     today = date.today()
     if window_days in {30, 60, 90}:
@@ -64,7 +65,9 @@ async def list_alerts(
 
 @router.get("/{alert_id}", response_model=AlertRead)
 async def get_alert(alert_id: int, session: AsyncSession = Depends(get_db_session)) -> Alert:
-    alert = await session.get(Alert, alert_id)
+    alert = await session.scalar(
+        select(Alert).options(selectinload(Alert.document)).where(Alert.id == alert_id)
+    )
     if alert is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Alerta no encontrada.")
     return alert
@@ -94,7 +97,7 @@ async def update_alert(
         setattr(alert, field, value)
 
     await session.commit()
-    await session.refresh(alert)
+    await session.refresh(alert, attribute_names=["document"])
     log_event("update_alert", f"alert_id={alert.id}")
     return alert
 

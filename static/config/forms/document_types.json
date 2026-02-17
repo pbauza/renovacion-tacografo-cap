@@ -40,6 +40,18 @@
           "required": true
         },
         {
+          "name": "flag_permiso_c",
+          "label": "Permiso C",
+          "type": "checkbox",
+          "required": false
+        },
+        {
+          "name": "flag_permiso_d",
+          "label": "Permiso D",
+          "type": "checkbox",
+          "required": false
+        },
+        {
           "name": "address",
           "label": "Direccion",
           "type": "text",

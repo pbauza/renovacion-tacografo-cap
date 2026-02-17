@@ -33,6 +33,8 @@ EXPECTED_COLUMNS = {
         "operation_number",
         "flag_fran",
         "flag_ciusaba",
+        "flag_permiso_c",
+        "flag_permiso_d",
         "expiry_fran",
         "expiry_ciusaba",
         "created_at",

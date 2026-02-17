@@ -21,6 +21,8 @@ class DocumentBase(BaseModel):
     operation_number: str | None = None
     flag_fran: bool = False
     flag_ciusaba: bool = False
+    flag_permiso_c: bool = False
+    flag_permiso_d: bool = False
     expiry_fran: date | None = None
     expiry_ciusaba: date | None = None
 
@@ -45,6 +47,8 @@ class DocumentUpdate(BaseModel):
     operation_number: str | None = None
     flag_fran: bool | None = None
     flag_ciusaba: bool | None = None
+    flag_permiso_c: bool | None = None
+    flag_permiso_d: bool | None = None
     expiry_fran: date | None = None
     expiry_ciusaba: date | None = None
 

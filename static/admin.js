@@ -486,10 +486,11 @@
           .map((a) => {
             const client = clientById[a.client_id];
             const doc = a.document_id ? docById[a.document_id] : null;
+            const alertDocType = doc ? doc.doc_type : a.doc_type;
             return `<tr>
               <td>${a.id}</td>
               <td>${client ? client.full_name : a.client_id}</td>
-              <td>${doc ? humanDocType(doc.doc_type) : "--"}</td>
+              <td>${humanDocType(alertDocType)}</td>
               <td>${a.expiry_date}</td>
               <td>${a.alert_date}</td>
               <td><a class="btn btn-sm btn-outline-secondary" href="/clients?client_id=${a.client_id}">Ver cliente</a></td>
@@ -505,7 +506,8 @@
         ? top.map((a) => {
             const client = clientById[a.client_id];
             const doc = a.document_id ? docById[a.document_id] : null;
-            return `<tr><td>${client ? client.full_name : a.client_id}</td><td>${doc ? humanDocType(doc.doc_type) : "--"}</td><td>${a.expiry_date}</td><td>${a.alert_date}</td></tr>`;
+            const alertDocType = doc ? doc.doc_type : a.doc_type;
+            return `<tr><td>${client ? client.full_name : a.client_id}</td><td>${humanDocType(alertDocType)}</td><td>${a.expiry_date}</td><td>${a.alert_date}</td></tr>`;
           }).join("")
         : renderEmptyRow(4, "Aun no hay alertas cargadas.");
     }
@@ -903,6 +905,18 @@
         data.append("file", importInput.files[0]);
         const result = await api("/tools/import/clients", { method: "POST", body: data });
         if (importResult) importResult.textContent = JSON.stringify(result, null, 2);
+        const errorsCount = Array.isArray(result?.errors) ? result.errors.length : 0;
+        alert(
+          [
+            "Importacion completada.",
+            `Clientes creados: ${result?.clients_created ?? 0}`,
+            `Clientes actualizados: ${result?.clients_updated ?? 0}`,
+            `Documentos creados: ${result?.documents_created ?? 0}`,
+            `Documentos omitidos por existir: ${result?.documents_skipped_existing ?? 0}`,
+            `Documentos existentes actualizados: ${result?.documents_updated_existing ?? 0}`,
+            `Errores: ${errorsCount}`,
+          ].join("\n")
+        );
       });
     }
 

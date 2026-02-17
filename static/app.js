@@ -48,6 +48,8 @@ function parseCreatePayload(form) {
 
   payload.flag_fran = boolValue(form, "flag_fran");
   payload.flag_ciusaba = boolValue(form, "flag_ciusaba");
+  payload.flag_permiso_c = boolValue(form, "flag_permiso_c");
+  payload.flag_permiso_d = boolValue(form, "flag_permiso_d");
   payload.client_id = Number(payload.client_id);
 
   return payload;
@@ -62,6 +64,8 @@ function parseEditPayload(form) {
 
   if (form.querySelector("[name=flag_fran]")) payload.flag_fran = boolValue(form, "flag_fran");
   if (form.querySelector("[name=flag_ciusaba]")) payload.flag_ciusaba = boolValue(form, "flag_ciusaba");
+  if (form.querySelector("[name=flag_permiso_c]")) payload.flag_permiso_c = boolValue(form, "flag_permiso_c");
+  if (form.querySelector("[name=flag_permiso_d]")) payload.flag_permiso_d = boolValue(form, "flag_permiso_d");
 
   return payload;
 }
